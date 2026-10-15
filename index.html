@@ -221,7 +221,9 @@ body.inmenu #emb{display:none!important}
 body.touch .weap{flex-wrap:nowrap;max-width:none;--sl:min(46px,calc((100vw - 40px)/11))}
 body.touch .weap .slot{box-sizing:border-box;width:var(--sl);height:var(--sl);font-size:calc(var(--sl)*.5);border-width:2px}
 body.touch .weap .slot.med{margin-left:4px}
-body.touch #ammobox div:not(.has):not(.cur){display:none}
+#ammobox div:not(.has):not(.cur){display:none}
+body:not(.touch) #ammobox{top:calc(130px + env(safe-area-inset-top,0px));transform:none}
+@media (max-height:800px){body:not(.touch) #chat div:nth-last-child(n+5){display:none}}
 body.touch .hud{padding-left:max(16px,env(safe-area-inset-left,0px))}
 body.touch #map{right:max(12px,env(safe-area-inset-right,0px))}
 body.touch #chat,body.touch #ammobox{left:max(12px,env(safe-area-inset-left,0px))}
