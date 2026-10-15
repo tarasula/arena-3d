@@ -3,6 +3,12 @@
 <title>Арена 3D — королевская битва</title>
 <meta name="description" content="Арена 3D — бесплатная 3D королевская битва на 100 игроков прямо в браузере. Прыгай из автобуса, собирай оружие и стань последним выжившим!">
 <meta name="theme-color" content="#1a1d22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Арена 3D">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Арена 3D — королевская битва">
 <meta property="og:description" content="Бесплатная 3D королевская битва на 100 игроков прямо в браузере. Играй на компьютере и телефоне!">
@@ -103,7 +109,7 @@ body.god .vig{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgb
 #skinact{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:800;color:#fff}#skinact small{color:#ff9f9f}
 #start .skb{font-size:16px;padding:10px 18px;border-radius:12px;background:#ffcf3f;color:#2a1300;border:0;box-shadow:0 4px 0 #b8860b}
 #start .skb:disabled{opacity:.45;cursor:not-allowed}
-@media (max-width:700px){#start{grid-template-columns:minmax(0,1fr);padding-top:36vh;align-content:start;background:linear-gradient(180deg,rgba(8,12,24,0) 0,rgba(8,12,24,0) 30vh,rgba(8,12,24,.94) 42vh)}#start .skins{justify-self:stretch;width:auto}#start #play{font-size:28px}}
+@media (max-width:900px){#start{grid-template-columns:minmax(0,1fr);padding-top:36vh;align-content:start;background:linear-gradient(180deg,rgba(8,12,24,0) 0,rgba(8,12,24,0) 30vh,rgba(8,12,24,.94) 42vh)}#start .skins{justify-self:stretch;width:auto}#start #play{font-size:28px}}
 body.teaser .hud,body.teaser #stars,body.teaser #map,body.teaser #feed,body.teaser #bottom,body.teaser .weap,body.teaser #ammobox,body.teaser .cross,body.teaser #hint,body.teaser #toast,body.teaser #chat,body.teaser #alive,body.teaser #banner,body.teaser #ann,body.teaser #fire,body.teaser #aimb,body.teaser #carb,body.teaser #chatb,body.teaser #invb,body.teaser #emb,body.teaser .dn,body.teaser #jumpb{display:none!important}
 .tzbtns{display:flex;gap:8px;flex-wrap:wrap;width:min(100%,320px)}#start .tzbtns .voice{width:auto;flex:1}
 #tz{position:fixed;inset:0;z-index:30;pointer-events:none}#tz .bar{position:absolute;left:0;right:0;height:11vh;background:#000}#tz .top{top:0}#tz .bot{bottom:0}#tzFlash{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .35s}#tzT{position:absolute;left:0;right:0;top:40%;text-align:center;font-family:var(--display);font-size:clamp(28px,7vw,86px);color:#fff;text-shadow:0 0 30px #ff7a1a,0 6px 0 #000;letter-spacing:.04em;opacity:0}#tzT.on{animation:tzIn 2.6s ease forwards}@keyframes tzIn{0%{opacity:0;transform:scale(1.6);filter:blur(8px)}15%{opacity:1;transform:scale(1);filter:none}80%{opacity:1}100%{opacity:0;transform:scale(.96)}}#tzS{position:absolute;left:0;right:0;top:calc(40% + clamp(40px,9vw,110px));text-align:center;font-weight:800;font-size:clamp(14px,2.4vw,26px);color:#ffcf3f;text-shadow:0 2px 6px #000;opacity:0}#tzS.on{animation:tzIn 2.6s .25s ease forwards}#tzT.logo{top:30%;font-size:clamp(44px,11vw,140px);color:#ffcf3f;text-shadow:0 0 40px #ffb300,0 8px 0 #7a4a00;animation:tzLogo 6s ease forwards}@keyframes tzLogo{0%{opacity:0;transform:scale(2.5)}12%{opacity:1;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}#tzRecI{position:absolute;right:16px;top:calc(11vh + 10px);color:#ff3b3b;font-weight:800;text-shadow:0 1px 3px #000;animation:blink 1s infinite}@keyframes blink{50%{opacity:.3}}#tzSkip{position:absolute;right:16px;bottom:calc(11vh + 12px);pointer-events:auto;font-size:13px;padding:6px 12px;background:#000a;color:#fff;border:1px solid #fff5;border-radius:8px}
@@ -210,6 +216,28 @@ body.inmenu #emb{display:none!important}
 @media (max-width:700px){#start .lp{padding-top:8px}#start #passb{font-size:15px;padding:8px 12px}}
 @media (prefers-reduced-motion:reduce){.cube,.pc.open{animation:none}}
 
+/* ===== телефоны и планшеты ===== */
+body.touch .weap{flex-wrap:nowrap;max-width:none;--sl:min(46px,calc((100vw - 40px)/11))}
+body.touch .weap .slot{box-sizing:border-box;width:var(--sl);height:var(--sl);font-size:calc(var(--sl)*.5);border-width:2px}
+body.touch .weap .slot.med{margin-left:4px}
+body.touch #ammobox div:not(.has):not(.cur){display:none}
+body.touch .hud{padding-left:max(16px,env(safe-area-inset-left,0px))}
+body.touch #map{right:max(12px,env(safe-area-inset-right,0px))}
+body.touch #chat,body.touch #ammobox{left:max(12px,env(safe-area-inset-left,0px))}
+body.touch #fire,body.touch #carb{right:max(24px,env(safe-area-inset-right,0px))}
+@media (max-width:700px){
+ body.touch #ammobox{top:calc(170px + env(safe-area-inset-top,0px));bottom:auto}
+ body.touch #chat{width:min(300px,56vw);bottom:calc(128px + env(safe-area-inset-bottom,0px))}
+ body.touch #chat div:nth-last-child(n+5){display:none}
+}
+@media (max-height:500px){
+ body.touch .hud{font-size:11px}body.touch #map{width:100px;height:100px}body.touch #feed{top:118px;font-size:11px}
+ body.touch #alive{right:120px;font-size:15px;padding:4px 8px}body.touch #stars{font-size:19px}body.touch .sbar{width:100px}
+ body.touch #ammobox{display:none}
+ body.touch #chat{bottom:calc(122px + env(safe-area-inset-bottom,0px));font-size:11px;width:min(300px,38vw)}
+ body.touch #chat div:nth-last-child(n+4){display:none}
+ body.touch #ammo{font-size:20px}
+}
 .hurt{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 120px #ff0000;opacity:0;transition:opacity .3s}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Rubik:wght@500;800&display=swap">
@@ -254,7 +282,7 @@ body.inmenu #emb{display:none!important}
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const touch=matchMedia('(pointer:coarse)').matches;
+const touch=matchMedia('(pointer:coarse)').matches;if(touch)document.body.classList.add('touch');
 // звук: всё синтезируется, без файлов
 let AC=null,master,noiseBuf,engine,engineGain;
 function audioInit(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(_){return}
@@ -1276,7 +1304,7 @@ function onRemote(p){if(p.sameTab){net.me=p.peer;return}if(p.kind!=='viewer')ret
  const dz=num(pr.deaths);if(dz>r.seenDeaths){r.seenDeaths=dz;if(pr.killer===net.me&&net.me){creditKill(r.nick,{player:1,head:r.lastHead,icon:r.lastIcon});winCrown(1,'игрок побеждён')}}}
 async function netInit(){const lob=document.getElementById('lobby');let room=null;
  try{room=window.claude&&window.claude.use?await window.claude.use('room'):null}catch(_){}
- if(!room){lob.textContent='🎮 Игра с ботами. Прогресс и короны сохраняются в этом браузере.';return}
+ if(!room){lob.textContent='🎮 Игра с ботами. Прогресс и короны сохраняются в этом браузере.';{const sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;if(touch&&!sa){const d=document.createElement('div');d.style.cssText='margin-top:6px;color:#ffcf3f';d.textContent=/iPhone|iPad|iPod/.test(navigator.userAgent)?'📲 Совет: «Поделиться» → «На экран „Домой“» — игра откроется на весь экран':'📲 Совет: меню браузера → «Добавить на главный экран» — игра откроется на весь экран';lob.appendChild(d)}}return}
  net.room=room;lob.textContent='🌐 Онлайн! Ждём друзей — отправь им ссылку на эту игру.';
  room.onPeers(ch=>{ch.left.forEach(p=>{const r=net.rem.get(p.peer);if(r){if(r.g)S.remove(r.g);net.rem.delete(p.peer);toast(`${r.nick} вышел из игры`,'#aaa')}});ch.peers.forEach(onRemote);renderLobby()},
   ()=>{net.room=null;lob.textContent='🎮 Одиночная игра (сеть недоступна)'});sendPresence(true)}
