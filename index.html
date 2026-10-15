@@ -1473,7 +1473,7 @@ const ab=document.getElementById('aimb');if(touch)ab.hidden=false;ab.addEventLis
 function doAction(){if(!playing||!me||me.zip)return;const nz=nearZip();if(nz)grabZip(nz);else if(nearShop())shopTalk();else{const d=nearDoor();if(d)tryDoor(d);else if(touch&&!drive&&nearWin())vault();else toggleCar()}}
 const cb=document.getElementById('carb');if(touch)cb.hidden=false;cb.addEventListener('touchstart',e=>{doAction();e.preventDefault()},{passive:false});
 if(touch)setInterval(()=>{if(!playing||!me)return;const ic=drive?'🚶':nearZip()?'🚡':nearShop()?'🧑‍💼':nearDoor()?'🚪':nearWin()?'🪟':nearCar()?'🚗':'✋';if(cb.textContent!==ic)cb.textContent=ic;cb.classList.toggle('idle',ic==='✋');
- const show=!busOn&&!drive&&!dying;jt.hidden=!show&&!busOn;fb.hidden=!show;ab.hidden=!show;if(busOn)jt.hidden=true},200);
+ const show=!busOn&&!drive&&!dying;jt.hidden=!show;fb.hidden=!show;ab.hidden=!show;cb.hidden=busOn||dying},200);
 const st=document.getElementById('start');
 function startGame(){if(touch&&innerHeight>innerWidth)setTimeout(()=>toast('📱 Поверни телефон горизонтально — так удобнее','#ffcf3f'),9000);document.getElementById('win').hidden=true;document.getElementById('pass').hidden=true;lobIsl.visible=lobClouds.visible=false;fx.hidden=true;fxBusy=false;try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}catch(_){}audioInit();AC&&AC.resume&&AC.resume();reset();playing=true;st.classList.add('fading');fade.style.opacity=1;setTimeout(()=>{st.hidden=true;fade.style.opacity=0},500);if(!touch)try{const p=cvs.requestPointerLock();p&&p.catch&&p.catch(()=>{})}catch(_){}};
 
