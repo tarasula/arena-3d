@@ -735,8 +735,8 @@ function nadeTick(dt){for(let i=flyNades.length-1;i>=0;i--){const n=flyNades[i],
   if(n.t<=0){S.remove(n.g);flyNades.splice(i,1);explode(p.clone(),5.5)}}}
 function updBar(){const el=document.querySelector('.weap');const list=ownedList();let html='';for(let k=0;k<9;k++){const i=list[k];if(i===undefined){html+='<div class="slot"></div>';continue}const w=WEAP[i];
   html+=`<button class="slot${i===wi?' on':''}" data-w="${i}" title="${w.n}"><i style="background:${RAR[w.rar]}"></i><span class="si">${w.ic}</span><span class="sn">${k+1}</span>${w.melee?'':`<span class="sc">${ammo[i].m}</span>`}</button>`}
- html+=`<button class="slot med" data-nade="1" title="Гранаты — G"><span class="si">💣</span><span class="sc">${nades}</span></button>`;html+=`<button class="slot" data-med="1" title="Аптечки — H"><span class="si">🩹</span><span class="sc">${med}</span></button>`;if(el._h===html)return;el._h=html;el.innerHTML=html;
- const h=el.offsetHeight;document.getElementById('bottom').style.bottom=`calc(${h+24}px + env(safe-area-inset-bottom,0px))`;toastEl.style.bottom=`calc(${h+92}px + env(safe-area-inset-bottom,0px))`}
+ html+=`<button class="slot med" data-nade="1" title="Гранаты — G"><span class="si">💣</span><span class="sc">${nades}</span></button>`;html+=`<button class="slot" data-med="1" title="Аптечки — H"><span class="si">🩹</span><span class="sc">${med}</span></button>`;if(el._h!==html){el._h=html;el.innerHTML=html}
+ const h=el.offsetHeight;if(!h||h===el._oh)return;el._oh=h;document.getElementById('bottom').style.bottom=`calc(${h+24}px + env(safe-area-inset-bottom,0px))`;toastEl.style.bottom=`calc(${h+92}px + env(safe-area-inset-bottom,0px))`}
 // ===== очки, звёзды, серии убийств =====
 const NAMES=['Котлета','Ночной_Волк','ПроКиллер','Бублик','Лёха_PRO','Шустрик','Танкист','Снайпер228','Тень','Кактус','Бобёр','Молния','Гром','Пельмень','Ниндзя','Сырок','Батон','Хомяк'];
 let god=false,prevStars=0,shotId=0,streak=0,multi=0,multiT=0,firstBlood=false,kills=0,curLoc='';
