@@ -19,7 +19,7 @@
 --display:"Rubik Mono One","Arial Black",sans-serif;--body:"Rubik",system-ui,sans-serif}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);margin:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
-#v{position:fixed;inset:0}
+#v{position:fixed;inset:0;background:#000}#v canvas{display:block;position:absolute;left:0;top:0;width:100%!important;height:100%!important}
 .hud{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);display:flex;justify-content:space-between;gap:10px;padding:10px 16px;font-weight:800;font-variant-numeric:tabular-nums;text-shadow:0 2px 4px #000;pointer-events:none;flex-wrap:wrap}
 .hud b{font-family:var(--display);color:var(--accent);font-weight:400}
 .cross{position:fixed;left:50%;top:50%;width:22px;height:22px;margin:-11px;pointer-events:none}
@@ -292,7 +292,7 @@ body.tour #feed{display:none}body.inmenu #rate,body.teaser #rate{display:none!im
 #frdot2:not(:empty),#qdot:not(:empty){display:inline-block;margin-left:4px;background:#ff3b5c;color:#fff;border-radius:8px;padding:0 5px;font-size:11px}
 .tabs{flex-wrap:wrap}
 #recb{position:fixed;right:174px;top:calc(70px + env(safe-area-inset-top,0px));width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;z-index:6}#recb.on{background:#ff3b3b;border-color:#fff;animation:blink 1s infinite}
-@media (max-width:700px),(max-height:500px){#recb{right:120px;top:calc(60px + env(safe-area-inset-top,0px));width:40px;height:40px;font-size:16px}}
+@media (max-width:700px),(max-height:500px){#recb{right:calc(max(12px,env(safe-area-inset-right,0px)) + 112px);top:calc(60px + env(safe-area-inset-top,0px));width:40px;height:40px;font-size:16px}}
 body.inmenu #recb,body.teaser #recb{display:none!important}
 #start #frb{font-family:var(--display);font-weight:400;font-size:18px;padding:10px 16px;border-radius:14px;background:linear-gradient(135deg,#2a63d4,#18a0c8);color:#fff;border:3px solid #9fe3ff;box-shadow:0 5px 0 #123a7a;position:relative}
 @media (max-width:700px){#start #frb{font-size:15px;padding:8px 12px}}
@@ -412,7 +412,7 @@ const S=new THREE.Scene();S.background=new THREE.Color('#c9d8e6');S.fog=new THRE
  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;
  const sky=new THREE.Mesh(new THREE.SphereGeometry(260,32,16),new THREE.MeshBasicMaterial({map:t,side:THREE.BackSide,fog:false}));S.add(sky);skyM=sky.material}
 const C=new THREE.PerspectiveCamera(72,1,.05,300);
-function rs(){R.setSize(innerWidth,innerHeight);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix()}addEventListener('resize',rs);rs();
+function rs(){const vv=document.getElementById('v'),w=vv.clientWidth||innerWidth,h=Math.max(vv.clientHeight||0,innerHeight);R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}addEventListener('resize',rs);addEventListener('orientationchange',()=>setTimeout(rs,300));if(window.visualViewport)visualViewport.addEventListener('resize',rs);rs();
 const hemi=new THREE.HemisphereLight('#dfeaf5','#4a4640',.75);S.add(hemi);
 const sun=new THREE.DirectionalLight('#fff4e0',1);sun.position.set(80,140,55);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0004;sun.shadow.normalBias=.03;
 Object.assign(sun.shadow.camera,{left:-135,right:135,top:135,bottom:-135,far:420});S.add(sun);
