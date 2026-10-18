@@ -312,6 +312,11 @@ body.inmenu #mates,body.inmenu #knock,body.teaser #mates{display:none!important}
 #gover .gt{font-family:var(--display);font-size:clamp(46px,11vw,120px);color:#ff3b3b;-webkit-text-stroke:3px #000;text-shadow:0 8px 0 #4a0000,0 0 40px #ff0000;animation:winPop 1s cubic-bezier(.2,1.5,.4,1)}
 #gover .gs{margin-top:12px;font-weight:800;font-size:clamp(16px,3.4vw,28px);color:#fff;text-shadow:0 3px 6px #000;text-align:center;padding:0 16px}
 .hurt{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 120px #ff0000;opacity:0;transition:opacity .3s}
+#exitb{position:fixed;left:50%;top:calc(6px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:21;font-size:13px;padding:5px 12px;border-radius:20px;background:#000a;color:#fff;border:2px solid #ffffff55;font-weight:800;opacity:.85}
+body.inmenu #exitb,body.teaser #exitb{display:none!important}
+#exitd{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:#000b}#exitd[hidden]{display:none}
+#exitd div{background:#141b26;border:3px solid #ff9f9f;border-radius:16px;padding:18px 20px;color:#fff;font-weight:800;text-align:center;max-width:min(340px,calc(100vw - 32px))}
+#exitd p{margin:0 0 14px;font-size:16px;line-height:1.35}#exitd small{display:block;font-weight:600;opacity:.8;margin-top:6px}#exitd button{font-size:16px;padding:10px 16px;margin:4px;border-radius:12px}#exitd .r{background:#ff4d6d;border-color:#ff4d6d;color:#fff}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Rubik:wght@500;800&display=swap">
 <div id="v"></div><script>document.body.classList.add("inmenu")</script>
@@ -1811,7 +1816,20 @@ function botShoot(b){snd('bot',Math.min(1,6/Math.max(1,Math.hypot(b.g.position.x
 
 // управление
 const cvs=R.domElement;
-addEventListener('keydown',e=>{if(uiKey(e))return;if(me&&me.emote&&['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))stopEmote();if(playing&&me&&me.zip&&e.code==='Space'){releaseZip();e.preventDefault();return}keys[e.code]=1;if(playing&&busOn&&['Space','Digit0','Numpad0','KeyF','Enter'].includes(e.code)){jumpBus();e.preventDefault();return}if(playing&&me&&me.sky===1&&e.code==='Space'){openChute();e.preventDefault();return}const dg=/^Digit(\d)$/.exec(e.code);if(dg){if(build&&+dg[1]>=1&&+dg[1]<=3)setPiece(['wall','floor','stair'][+dg[1]-1]);else{if(build)toggleBuild(false);setW(ownedList()[(+dg[1]+9)%10])}}if(e.code==='KeyQ')cycleW(1);if(e.code==='KeyX'&&playing&&!busOn&&!e.repeat)toggleBuild();if(playing&&!busOn&&!e.repeat){if(e.code==='KeyF')cycleW(1);if(e.code==='KeyH')useMed();if(e.code==='KeyJ')useShield();if(e.code==='KeyB')vault();if(e.code==='KeyV')roll();if(e.code==='KeyG')throwNade()}if(e.code==='KeyR'&&playing){if(build)setBMat();else if(drive&&nearGas())refuel();else startReload()}if(e.code==='KeyM'&&playing&&drive&&!e.repeat)radioNext();if(e.code==='KeyE')doAction();if(e.code==='Space'&&me&&!me.kn&&!me.air&&!me.fly&&!(me.cr>.3))vy=6.6;if(e.code==='KeyS'||e.code==='Space')e.preventDefault()});
+addEventListener('keydown',e=>{if(uiKey(e))return;{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return}if(me&&me.emote&&['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))stopEmote();if(playing&&me&&me.zip&&e.code==='Space'){releaseZip();e.preventDefault();return}keys[e.code]=1;if(playing&&busOn&&['Space','Digit0','Numpad0','KeyF','Enter'].includes(e.code)){jumpBus();e.preventDefault();return}if(playing&&me&&me.sky===1&&e.code==='Space'){openChute();e.preventDefault();return}const dg=/^Digit(\d)$/.exec(e.code);if(dg){if(build&&+dg[1]>=1&&+dg[1]<=3)setPiece(['wall','floor','stair'][+dg[1]-1]);else{if(build)toggleBuild(false);setW(ownedList()[(+dg[1]+9)%10])}}if(e.code==='KeyQ')cycleW(1);if(e.code==='KeyX'&&playing&&!busOn&&!e.repeat)toggleBuild();if(playing&&!busOn&&!e.repeat){if(e.code==='KeyF')cycleW(1);if(e.code==='KeyH')useMed();if(e.code==='KeyJ')useShield();if(e.code==='KeyB')vault();if(e.code==='KeyV')roll();if(e.code==='KeyG')throwNade()}if(e.code==='KeyR'&&playing){if(build)setBMat();else if(drive&&nearGas())refuel();else startReload()}if(e.code==='KeyM'&&playing&&drive&&!e.repeat)radioNext();if(e.code==='KeyE')doAction();if(e.code==='Space'&&me&&!me.kn&&!me.air&&!me.fly&&!(me.cr>.3))vy=6.6;if(e.code==='KeyS'||e.code==='Space')e.preventDefault()});
+
+// ----- выход из катки -----
+(()=>{const b=document.createElement('button');b.id='exitb';b.textContent='🚪 Выйти';b.hidden=true;document.body.appendChild(b);
+ const d=document.createElement('div');d.id='exitd';d.hidden=true;d.innerHTML='<div><p>Выйти из катки?<small id="exitn">Прогресс этой катки не засчитается.</small></p><button class="r" id="exity">Выйти</button><button id="exitno">Остаться</button></div>';document.body.appendChild(d);
+ window.openExit=()=>{if(!playing||!me)return;Object.keys(keys).forEach(k=>keys[k]=0);firing=false;try{document.exitPointerLock&&document.exitPointerLock()}catch(_){}document.getElementById('exitn').textContent=FB.game?'Прогресс этой катки не засчитается. Друзья продолжат без тебя.':'Прогресс этой катки не засчитается.';d.hidden=false};
+ window.closeExit=()=>{d.hidden=true;if(playing&&!touch&&!chatOpen&&!invOpen){try{const p=cvs.requestPointerLock();p&&p.catch&&p.catch(()=>{})}catch(_){}}};
+ b.onclick=openExit;document.getElementById('exitno').onclick=closeExit;
+ document.getElementById('exity').onclick=()=>{d.hidden=true;exitMatch()};
+ setInterval(()=>{b.hidden=!playing||!!tourT&&tourT>0},400)})();
+function exitMatch(){if(!playing)return;if(chatOpen)closeChat();try{exitCar()}catch(_){}endDeathCam();dying=false;me.kn=null;if(FB.game){try{fbEv({k:'left',n:FB.nick||myNick})}catch(_){}endPartyGame()}
+ tourneyOn=false;playing=false;firing=false;aiming=false;try{document.exitPointerLock&&document.exitPointerLock()}catch(_){}
+ ['knock','mates','gover'].forEach(id=>{const e=document.getElementById(id);if(e)e.hidden=true});
+ document.getElementById('st').textContent='ТЫ ВЫШЕЛ ИЗ КАТКИ';document.getElementById('sp').textContent='Прогресс катки не засчитан. Нажми «ИГРАТЬ», чтобы начать заново.';st.hidden=false;st.classList.remove('fading');fade.style.opacity=0;updPartyUI()}
 addEventListener('keyup',e=>keys[e.code]=0);
 let locked=false;document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cvs});
 let aiming=false,swX=0,swY=0,tswX=0,tswY=0,shakeT=0,pump=0,land=0;
