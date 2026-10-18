@@ -143,6 +143,9 @@ body.inmenu .hud,body.inmenu #stars,body.inmenu #map,body.inmenu #feed,body.inme
 body.inmenu #emb{display:none!important}
 #tabEm,#pEm,#emb,#emw{display:none!important}
 #radb,#fuelb{position:fixed;right:16px;width:56px;height:56px;padding:0;font-size:24px;border-radius:50%;z-index:6}#radb{bottom:calc(230px + env(safe-area-inset-bottom,0px))}#fuelb{bottom:calc(296px + env(safe-area-inset-bottom,0px))}
+#chath{position:fixed;left:128px;top:calc(110px + env(safe-area-inset-top,0px));width:48px;height:48px;padding:0;font-size:22px;border-radius:50%}
+body.chathide #chat{display:none!important}body.chathide #chath{opacity:.55}
+body.inmenu #chath,body.teaser #chath{display:none!important}
 #invb{position:fixed;left:72px;top:calc(110px + env(safe-area-inset-top,0px));width:48px;height:48px;padding:0;font-size:22px;border-radius:50%}
 #rope{display:none}
 @media (max-width:700px){.weap .slot{width:34px;height:34px;font-size:17px}.grid{grid-template-columns:repeat(9,34px)}.grid .slot{width:34px;height:34px;font-size:17px}.slot .sc{font-size:10px}}
@@ -254,7 +257,10 @@ body.touch #chat,body.touch #ammobox{left:max(12px,env(safe-area-inset-left,0px)
  body.touch #ammobox{display:none}
  body.touch #feed{display:none}
  body.touch #chatb,body.touch #invb{top:calc(6px + env(safe-area-inset-top,0px));width:42px;height:42px;font-size:19px}
- body.touch #chatb{left:calc(50% - 190px)}body.touch #invb{left:calc(50% - 142px)}
+ body.touch #chath{top:calc(6px + env(safe-area-inset-top,0px));width:42px;height:42px;font-size:19px}
+ body.touch #chatb{left:calc(50% - 238px)}body.touch #invb{left:calc(50% - 190px)}body.touch #chath{left:calc(50% - 142px)}
+ body.touch #alive{right:calc(max(12px,env(safe-area-inset-right,0px)) + 112px)}
+ #exitb{left:calc(50% + 62px);transform:none}
  body.touch #chat{bottom:calc(var(--hb,60px) + 90px + env(safe-area-inset-bottom,0px));font-size:11px;width:min(300px,32vw)}
  body.touch #chat div:nth-last-child(n+4){display:none}
  body.touch #ammo{font-size:20px}
@@ -312,14 +318,29 @@ body.inmenu #mates,body.inmenu #knock,body.teaser #mates{display:none!important}
 #gover .gt{font-family:var(--display);font-size:clamp(46px,11vw,120px);color:#ff3b3b;-webkit-text-stroke:3px #000;text-shadow:0 8px 0 #4a0000,0 0 40px #ff0000;animation:winPop 1s cubic-bezier(.2,1.5,.4,1)}
 #gover .gs{margin-top:12px;font-weight:800;font-size:clamp(16px,3.4vw,28px);color:#fff;text-shadow:0 3px 6px #000;text-align:center;padding:0 16px}
 .hurt{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 120px #ff0000;opacity:0;transition:opacity .3s}
-#exitb{position:fixed;left:50%;top:calc(6px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:21;font-size:13px;padding:5px 12px;border-radius:20px;background:#000a;color:#fff;border:2px solid #ffffff55;font-weight:800;opacity:.85}
+#exitb{position:fixed;left:calc(50% + 92px);top:calc(6px + env(safe-area-inset-top,0px));z-index:21;font-size:13px;padding:5px 12px;border-radius:20px;background:#000a;color:#fff;border:2px solid #ffffff55;font-weight:800;opacity:.85}
 body.inmenu #exitb,body.teaser #exitb{display:none!important}
+@media (max-width:700px) and (orientation:portrait){#exitb{left:50%;transform:translateX(-50%);top:calc(62px + env(safe-area-inset-top,0px))}}
 #exitd{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:#000b}#exitd[hidden]{display:none}
 #exitd div{background:#141b26;border:3px solid #ff9f9f;border-radius:16px;padding:18px 20px;color:#fff;font-weight:800;text-align:center;max-width:min(340px,calc(100vw - 32px))}
 #exitd p{margin:0 0 14px;font-size:16px;line-height:1.35}#exitd small{display:block;font-weight:600;opacity:.8;margin-top:6px}#exitd button{font-size:16px;padding:10px 16px;margin:4px;border-radius:12px}#exitd .r{background:#ff4d6d;border-color:#ff4d6d;color:#fff}
 #frbody .plusb{padding:0 14px;font-size:22px;background:#2a3444;color:#fff;border-color:#3a4656}#frbody .plusm{margin:6px 0}#frbody .plusm button{width:100%;padding:10px;font-size:16px;background:#ffd23f;color:#3a2b00;border-color:#ffd23f}
 #frbody .gopts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}#frbody .gopts button{padding:9px 12px;font-size:15px}#frbody .gopts button[disabled]{opacity:.35}
 #giftpop{top:calc(76px + env(safe-area-inset-top,0px));border-color:#ffd23f}#giftpop[hidden]{display:none}
+/* --- низкий горизонтальный экран (телефон): меню не должно налезать на верхние кнопки --- */
+@media (max-height:520px) and (orientation:landscape){
+ #start{padding-top:calc(60px + env(safe-area-inset-top,0px));padding-bottom:10px;gap:10px}
+ #start .topb{gap:6px}
+ #start #passb,#start #vipb,#start #frb{font-size:14px;padding:6px 12px;border-width:2px;box-shadow:0 3px 0 #0005}
+ #start .lp{gap:6px;justify-content:flex-start}
+ #start h1{font-size:28px;line-height:1.05}
+ #start .crowns{font-size:20px}
+ #start #sp{font-size:12px;line-height:1.25;max-width:none}
+ #start .nick input{padding:6px 10px;font-size:15px}
+ #start .team{padding:8px 16px;font-size:16px;box-shadow:0 4px 0 #0006}
+ #start #play{font-size:22px;padding:8px 24px}
+ #start #invite,#start .tzbtns button{padding:6px 14px;font-size:14px}
+}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Rubik:wght@500;800&display=swap">
 <div id="v"></div><script>document.body.classList.add("inmenu")</script>
@@ -329,13 +350,13 @@ body.inmenu #exitb,body.teaser #exitb{display:none!important}
 <div id="fade"></div>
 <div id="scope"></div><div class="cross"></div>
 <div class="hud"><b>АРЕНА 3D</b><span id="hud"></span></div>
-<div id="stars"></div><canvas id="map"></canvas><div id="feed"></div><div id="rate" hidden></div><div id="chat" aria-live="polite"></div><div id="chatin" hidden><input id="chatbox" maxlength="100" autocomplete="off" placeholder="Сообщение… Enter — отправить, Esc — закрыть"></div>
+<div id="stars"></div><canvas id="map"></canvas><div id="feed"></div><div id="rate" hidden></div><div id="chat" aria-live="polite"></div><div id="chatin" hidden><input id="chatbox" maxlength="100" autocomplete="off" placeholder="Сообщение…" enterkeyhint="send"></div>
 <div id="emw" hidden><div class="wheel" id="emwheel"></div></div>
 <div id="tz" hidden><div class="bar top"></div><div class="bar bot"></div><div id="tzFlash"></div><div id="tzT"></div><div id="tzS"></div><div id="tzRecI" hidden>● ЗАПИСЬ</div><button id="tzSkip">Пропустить ✕</button></div>
 <div id="inv" hidden><div class="invbox"><div class="invh">Инвентарь <small>I или Tab — закрыть · нажми на оружие, чтобы взять</small></div><div class="invsec">Оружие</div><div id="invw" class="grid"></div><div class="invsec">Патроны и вещи</div><div id="invi" class="grid"></div><div id="invinfo">Наведи на предмет, чтобы узнать о нём</div></div></div><div id="alive"></div><div id="ann"></div><div id="toast"></div><div id="hint"></div>
 <div id="ammobox"></div><div id="bottom"><div class="hp"><div id="hpt"></div><div class="hpb shb"><i id="shf"></i></div><div class="hpb"><i id="hpf"></i></div></div><div><div id="wn"></div><div id="ammo"></div></div><div id="matl"></div></div>
 <div class="weap"></div><div id="buildbar" hidden><button data-pc="wall"><b>🧱</b><span>Стена</span><small>1</small></button><button data-pc="floor"><b>⬜</b><span>Пол</span><small>2</small></button><button data-pc="stair"><b>📐</b><span>Лестница</span><small>3</small></button><button data-bm="1" id="bmatb"><b>🪵</b><span>Дерево</span><small>R</small></button><button data-bx="1"><b>✖</b><span>Выйти</span><small>X</small></button></div><button id="buildt" hidden aria-label="Строить">🔨</button>
-<button id="fire" hidden>🔥</button><button id="chatb" hidden>💬</button><button id="emb" hidden>🕺</button><button id="radb" hidden>📻</button><button id="fuelb" hidden>⛽</button><button id="invb" hidden>🎒</button><button id="recb" hidden aria-label="Записать игру">⏺</button><button id="jumpb" hidden>🪂 ПРЫЖОК</button><button id="carb" hidden>🚗</button><button id="jumpt" hidden aria-label="Прыжок">⬆</button><div id="joy" hidden><i></i></div><button id="aimb" hidden>🎯</button>
+<button id="fire" hidden>🔥</button><button id="chatb" hidden>💬</button><button id="emb" hidden>🕺</button><button id="radb" hidden>📻</button><button id="fuelb" hidden>⛽</button><button id="invb" hidden>🎒</button><button id="chath" hidden>👁</button><button id="recb" hidden aria-label="Записать игру">⏺</button><button id="jumpb" hidden>🪂 ПРЫЖОК</button><button id="carb" hidden>🚗</button><button id="jumpt" hidden aria-label="Прыжок">⬆</button><div id="joy" hidden><i></i></div><button id="aimb" hidden>🎯</button>
 <div id="fx" hidden><div class="fxc"><button id="fxx" aria-label="Закрыть">✕</button><div id="fxt"></div><div id="fxb"></div><div id="fxm" aria-live="polite"></div><button id="fxgo" class="skb"></button></div></div>
 <div id="win" hidden><div><div class="wt">🏆 ПОБЕДА!</div><div class="ws">Ты остался последний из 100 игроков!</div><div class="wk" id="wink"></div></div></div>
 <div id="frw" hidden><div class="pbox"><div class="phd"><h2 style="color:#9fe3ff">👥 ДРУЗЬЯ</h2><button id="frx" aria-label="Закрыть">✕</button></div><div id="frbody"></div></div></div><div id="invpop" hidden></div><div id="mates"></div><div id="knock" hidden></div><div id="gover" hidden><div class="gt">GAME OVER</div><div class="gs" id="goverS"></div></div><div id="vip" hidden><div class="pbox"><div class="phd"><h2 style="color:#ffd23f">👑 VIP 3D ПАСС</h2><button id="vipx" aria-label="Закрыть">✕</button></div><div id="vipbody"></div></div></div><div id="pass" hidden><div class="pbox"><div class="phd"><h2>⭐ 3D ПАСС</h2><button id="passx" aria-label="Закрыть">✕</button></div><div id="passbody"></div></div></div>
@@ -1939,7 +1960,7 @@ fb.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(fireT&&t.
 // прыжок на телефоне
 const jt=document.getElementById('jumpt');jt.addEventListener('touchstart',e=>{e.preventDefault();if(!playing||!me)return;if(me.emote)stopEmote();if(busOn){jumpBus();return}if(me.zip){releaseZip();return}if(me.sky===1){openChute();return}if(!me.kn&&!me.air&&!me.fly&&!(me.cr>.3))vy=6.6},{passive:false});
 {const rb=document.getElementById('radb'),fb=document.getElementById('fuelb');rb.addEventListener('click',e=>{e.stopPropagation();radioNext()});fb.addEventListener('click',e=>{e.stopPropagation();refuel()});setInterval(()=>{rb.hidden=!(touch&&playing&&drive);fb.hidden=!(touch&&playing&&nearGas())},300)}
-{const cb2=document.getElementById('chatb'),ib=document.getElementById('invb');if(touch){cb2.hidden=false;ib.hidden=false}cb2.addEventListener('click',e=>{e.stopPropagation();if(playing)openChat()});{const eb=document.getElementById('emb');eb.addEventListener('click',e=>{e.stopPropagation();if(playing){if(me&&me.emote)stopEmote();else toggleWheel()}})}ib.addEventListener('click',e=>{e.stopPropagation();if(playing)toggleInv()})}
+{const cb2=document.getElementById('chatb'),ib=document.getElementById('invb');if(touch){cb2.hidden=false;ib.hidden=false}cb2.addEventListener('click',e=>{e.stopPropagation();if(playing){if(chatOpen)closeChat();else openChat()}});{const hb=document.getElementById('chath');let hid=false;try{hid=localStorage.getItem('chathide')==='1'}catch(_){}const ap=()=>{document.body.classList.toggle('chathide',hid);hb.textContent=hid?'🙈':'👁'};ap();if(touch)hb.hidden=false;hb.addEventListener('click',e=>{e.stopPropagation();hid=!hid;try{localStorage.setItem('chathide',hid?'1':'0')}catch(_){}ap()})}{const eb=document.getElementById('emb');eb.addEventListener('click',e=>{e.stopPropagation();if(playing){if(me&&me.emote)stopEmote();else toggleWheel()}})}ib.addEventListener('click',e=>{e.stopPropagation();if(playing)toggleInv()})}
 const ab=document.getElementById('aimb');if(touch)ab.hidden=false;ab.addEventListener('touchstart',e=>{aiming=!aiming;ab.classList.toggle('on',aiming);e.preventDefault()},{passive:false});
 // кнопка действия = клавиша E: трос, продавец, дверь, окно, машина
 function doAction(){if(!playing||!me||me.zip)return;if(FB.game){const k=nearKnocked();if(k){if(!revive||revive.uid!==k.peer)revive={uid:k.peer,t:0};return}}if(me.kn)return;const nz=nearZip();if(nz)grabZip(nz);else if(nearShop())shopTalk();else{const d=nearDoor();if(d)tryDoor(d);else if(touch&&!drive&&nearWin())vault();else toggleCar()}}
