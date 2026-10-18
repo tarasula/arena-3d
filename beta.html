@@ -1411,7 +1411,7 @@ function hitRemote(r,dmg,pt,id,w,head){if(!r.alive)return;if(r.team===myTeam){sp
  dmg*=god?2:1;net.dmg.set(r.peer,(net.dmg.get(r.peer)||0)+dmg);if(r.lastShot!==id){r.lastShot=id;score+=100}r.lastHead=!!head;r.lastIcon=w.ic;spark(pt,'#9b1c1c',5,3);dmgNum(pt,Math.round(dmg),head);hitMark();sendPresence(true)}
 function sendPresence(force){if(!net.room)return;const n=performance.now();if(!force&&n-net.sendT<(FB.game?110:70))return;net.sendT=n;const r2=v=>Math.round(v*100)/100;
  const d=[];net.dmg.forEach((v,k)=>{if(net.rem.has(k))d.push([k,Math.round(v)])});
- net.room.presence({v:1,on:playing?1:0,nick:myNick,team:myTeam,x:r2(me.x),y:r2(me.y),z:r2(me.z),yaw:r2(yaw),pitch:r2(pitch),cr:r2(me.cr||0),w:wi,hp:Math.round(me.hp),alive:dying?0:1,f:net.fires,dmg:d.slice(0,12),deaths:net.deaths,killer:net.killer,god:god?1:0,bus:busOn?1:0,sky:me.sky||0,skin:PROF.skin,kn:me.kn?1:0,rv:revive?revive.uid:'',sh:Math.round(me.sh||0),cn:net.chatN||0,ct:net.chatT||'',cl:me.climb?1:0,zp:me.zip?1:0,ad:aiming?1:0,dr:drive?1:0,rl:rollT>0?1:0,em:me.emote?me.emote.id:''}).catch(()=>{})}
+ try{net.room.presence({v:1,on:playing?1:0,nick:myNick,team:myTeam,x:r2(me.x),y:r2(me.y),z:r2(me.z),yaw:r2(yaw),pitch:r2(pitch),cr:r2(me.cr||0),w:wi,hp:Math.round(me.hp),alive:dying?0:1,f:net.fires,dmg:d.slice(0,12),deaths:net.deaths,killer:net.killer,god:god?1:0,bus:busOn?1:0,sky:me.sky||0,skin:PROF.skin,kn:me.kn?1:0,rv:revive?revive.uid:'',sh:Math.round(me.sh||0),cn:net.chatN||0,ct:net.chatT||'',cl:me.climb?1:0,zp:me.zip?1:0,ad:aiming?1:0,dr:drive?1:0,rl:rollT>0?1:0,em:me.emote?me.emote.id:''}).catch(()=>{})}catch(e){}}
 function onRemote(p){if(p.sameTab){net.me=p.peer;return}if(p.kind!=='viewer')return;const pr=p.presence||{};if(pr.v!==1)return;
  let r=net.rem.get(p.peer);const nick=str(pr.nick)||'Игрок',team=pr.team==='blue'?'blue':'red';
  if(!r){r={peer:p.peer,nick,team,f:num(pr.f),seenDeaths:num(pr.deaths),seenDmg:null,ph:0};net.rem.set(p.peer,r);toast(`👋 ${nick} зашёл в игру (${team==='red'?'красные':'синие'})`,'#fff')}
@@ -1646,10 +1646,14 @@ const FB_CFG={apiKey:"AIzaSyDQoHg1-cESIu6IBempb3D3Gm4ULPoFp8g",authDomain:"arena
 const FB={ok:false,err:'',uid:null,db:null,nick:'',friends:{},reqs:{},unread:{},users:{},watch:{},party:null,pid:null,pref:null,game:null,gref:null,grefs:[],host:false,teamN:1,hostLeft:0,botNames:{},snapT:0,tab:'list',chatWith:null,chatRef:null,chatMsgs:[],found:null,spec:false,specDone:false,admin:false,banned:false,admMsg:'',admNick:'',admBans:null};
 let botNid=0,busAngle=null,revive=null,actHeld=false;const partyChars=new Map();
 function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('load '+src));document.head.appendChild(sc)})}
+
+// Firebase бросает исключение на NaN/undefined в данных — это «замораживало» игру. Чистим всё, что уходит в базу.
+function fbClean(v){if(typeof v==='number')return isFinite(v)?v:0;if(Array.isArray(v))return v.map(x=>x===undefined?0:fbClean(x));if(v&&typeof v==='object'){const o={};Object.keys(v).forEach(k=>{if(v[k]!==undefined)o[k]=fbClean(v[k])});return o}return v}
+function fbPatch(){try{const P=firebase.database.Reference.prototype;if(P.__clean)return;P.__clean=1;['set','push','update'].forEach(m=>{const o=P[m];P[m]=function(v,...r){if(!arguments.length)return o.call(this);try{return o.call(this,fbClean(v),...r)}catch(e){console.warn('fb '+m,e);return Promise.reject(e)}}})}catch(e){console.warn('fbPatch',e)}}
 const withTO=(pr,ms,what)=>Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej(new Error('не дождались: '+what)),ms))]);
 async function fbInit(){if(FB.busy||FB.ok)return;FB.busy=true;FB.err='';FB.step='загружаю Firebase';renderFr();
  try{const B='https://www.gstatic.com/firebasejs/10.12.2/';if(!(window.firebase&&firebase.auth&&firebase.database)){if(!window.firebase)await withTO(loadScript(B+'firebase-app-compat.js'),20000,'загрузка');if(!firebase.auth)await withTO(loadScript(B+'firebase-auth-compat.js'),20000,'загрузка');if(!firebase.database)await withTO(loadScript(B+'firebase-database-compat.js'),20000,'загрузка')}
-  if(!firebase.apps.length)firebase.initializeApp(FB_CFG);FB.db=firebase.database();const auth=firebase.auth();FB.step='вход в игру';renderFr();let user=null;
+  if(!firebase.apps.length)firebase.initializeApp(FB_CFG);FB.db=firebase.database();fbPatch();const auth=firebase.auth();FB.step='вход в игру';renderFr();let user=null;
   try{user=(await withTO(auth.signInAnonymously(),12000,'вход')).user}catch(e1){console.warn('auth1',e1);FB.step='вход (запасной способ)';renderFr();try{await withTO(auth.setPersistence(firebase.auth.Auth.Persistence.SESSION),5000,'вход')}catch(_){}user=(await withTO(auth.signInAnonymously(),15000,'вход')).user}
   FB.uid=user.uid;FB.ok=true;FB.busy=false;fbStart()}catch(e){FB.busy=false;FB.err=(e&&(e.code||e.message))||'ошибка';console.warn('firebase',e);renderFr()}}
 function fbStart(){const db=FB.db,u=FB.uid;
@@ -1951,7 +1955,9 @@ function pickTeam(t,fromParty){if(!fromParty&&FB.pid&&FB.party&&FB.party.leader=
 let selTeam='red';function selT(t){selTeam=t;document.getElementById('tred').classList.toggle('on',t==='red');document.getElementById('tblue').classList.toggle('on',t==='blue')}
 document.getElementById('tred').onclick=()=>selT('red');document.getElementById('tblue').onclick=()=>selT('blue');document.getElementById('play').onclick=()=>pickTeam(selTeam);
 let dF=0,dS=0;const clock=new THREE.Clock(),hurt=document.getElementById('hurt'),scopeEl=document.getElementById('scope');
-function loop(){const dt=Math.min(.05,clock.getDelta());
+function loop(){try{loop0()}catch(e){loopErr(e);requestAnimationFrame(loop)}}
+let errAt=0;function loopErr(e){window.__lastErr=(e&&e.stack)||String(e);console.error(e);const n=performance.now();if(n-errAt<4000)return;errAt=n;let b=document.getElementById('errbar');if(!b){b=document.createElement('div');b.id='errbar';b.style.cssText='position:fixed;left:8px;right:8px;bottom:4px;z-index:200;background:#7a0000dd;color:#fff;font:12px/1.3 monospace;padding:6px 8px;border-radius:8px;pointer-events:none;word-break:break-all';document.body.appendChild(b)}b.textContent='⚠ '+String((e&&e.message)||e).slice(0,160)+' @ '+(((e&&e.stack)||'').split('\n')[1]||'').trim().slice(-80);b.hidden=false;setTimeout(()=>{b.hidden=true},6000)}
+function loop0(){const dt=Math.min(.05,clock.getDelta());
  if(playing&&busOn){busTick(dt);worldTick(dt);updHud(dt)}else if(playing&&tourT>0){tourTick(dt);worldTick(dt);updHud(dt)}else if(playing){
   dF=dS=0;let f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.ArrowDown?1:0),s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
   if(touch){f=-mv.y;s=mv.x}dF=Math.max(-1,f-(keys.KeyS&&drive?1:0));dS=s;if(dying||drive||me.zip){f=s=0}
