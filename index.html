@@ -1415,7 +1415,7 @@ function sendPresence(force){if(!net.room)return;const n=performance.now();if(!f
 function onRemote(p){if(p.sameTab){net.me=p.peer;return}if(p.kind!=='viewer')return;const pr=p.presence||{};if(pr.v!==1)return;
  let r=net.rem.get(p.peer);const nick=str(pr.nick)||'Игрок',team=pr.team==='blue'?'blue':'red';
  if(!r){r={peer:p.peer,nick,team,f:num(pr.f),seenDeaths:num(pr.deaths),seenDmg:null,ph:0};net.rem.set(p.peer,r);toast(`👋 ${nick} зашёл в игру (${team==='red'?'красные':'синие'})`,'#fff')}
- r.nick=nick;r.team=team;r.skin=skinOf(str(pr.skin,12)).id;r.p=pr;r.alive=!!pr.alive&&!!pr.on;if(r.builtFor!==team+'|'+myTeam+'|'+nick+'|'+r.skin)makeRemote(r);{const cn=num(pr.cn);if(r.cn===undefined)r.cn=cn;else if(cn>r.cn){r.cn=cn;const t=str(pr.ct,100);if(t)chatSay(r.nick,t,TEAMC[r.team])}}
+ r.nick=nick;r.team=team;r.skin=skinOf(str(pr.skin,12)).id;r.p=pr;r.rx=performance.now();r.alive=!!pr.alive&&!!pr.on;if(r.builtFor!==team+'|'+myTeam+'|'+nick+'|'+r.skin)makeRemote(r);{const cn=num(pr.cn);if(r.cn===undefined)r.cn=cn;else if(cn>r.cn){r.cn=cn;const t=str(pr.ct,100);if(t)chatSay(r.nick,t,TEAMC[r.team])}}
  // урон, который этот игрок нанёс мне
  const mine=Array.isArray(pr.dmg)?pr.dmg.find(e=>Array.isArray(e)&&e[0]===net.me):null,tot=mine?num(mine[1]):0;
  if(r.seenDmg===null||tot<r.seenDmg)r.seenDmg=tot;else if(tot>r.seenDmg){const dd=Math.min(150,tot-r.seenDmg);r.seenDmg=tot;
@@ -1841,10 +1841,10 @@ function onNetEv(e){if(!playing&&e.k!=='win')return;
  else if(e.k==='ub'){if(e.by!==FB.uid){const pc=pieces.find(q=>q.key===e.key);if(pc){pc.netGone=1;dmgPiece(pc,1e6)}}}}
 // боты у гостей — копия ботов лидера
 function nameRemoteBot(b){const i=FB.botNames[b.nid];if(!i)return;b.name=str(i.n||'Игрок',24);if(i.s&&!b.skinned){b.skinned=1;applySkin(b.g,i.s)}}
-function onBotSnap(v){if(!v||!playing||FB.host)return;FB.hostLeft=+v.l||0;const arr=Array.isArray(v.b)?v.b:[];
+function onBotSnap(v){if(!v||!playing||FB.host)return;FB.snapRx=performance.now();FB.hostLeft=+v.l||0;const arr=Array.isArray(v.b)?v.b:[];
  arr.forEach(e=>{if(!Array.isArray(e))return;const [id,x,y,z,r,fl,fc,tg]=e;let b=bots.find(q=>q.remote&&q.nid===id);const dead=fl&1;
   if(!b){if(dead)return;const g=person();g.position.set(x/10,y/10,z/10);S.add(g);b={g,remote:1,nid:id,name:'Игрок',hp:100,max:100,sk:'norm',mood:(q=>q<.3?'bad':q<.65?'good':'norm')(Math.random()),t:Math.random()*9,fc:fc||0,armed:false,ph:0};bots.push(b);nameRemoteBot(b)}
-  b.tx=x/10;b.ty=y/10;b.tz=z/10;b.tr=r/100;b.armed=!!(fl&2);b.rsky=fl&4?1:fl&8?2:0;b.aim=!!(fl&16);
+  b.tx=x/10;b.ty=y/10;b.tz=z/10;b.tr=r/100;b.armed=!!(fl&2);FB.snapRx=performance.now();b.rsky=fl&4?1:fl&8?2:0;b.aim=!!(fl&16);
   if(dead&&!b.dead){b.dead=1;b.fall=0}
   if((fc||0)>b.fc){b.fc=fc;const from=b.g.position.clone().setY(b.g.position.y+1.35);let to;if(tg===FB.uid)to=new THREE.Vector3(me.x,me.y-.3,me.z);else{const rr=net.rem.get(tg);to=rr&&rr.g?rr.g.position.clone().setY(rr.g.position.y+1.2):from.clone().add(new THREE.Vector3(Math.sin(b.g.rotation.y)*30,0,Math.cos(b.g.rotation.y)*30))}tracer(from,to,'#ffd27a');snd('bot',Math.min(.8,6/Math.max(1,Math.hypot(b.g.position.x-me.x,b.g.position.z-me.z))))}})}
 function remoteBotTick(b,dt){const p=b.g.position,u=b.g.userData,k=Math.min(1,dt*10),ox=p.x,oz=p.z;if(b.tx===undefined)return;
@@ -1955,7 +1955,14 @@ function pickTeam(t,fromParty){if(!fromParty&&FB.pid&&FB.party&&FB.party.leader=
 let selTeam='red';function selT(t){selTeam=t;document.getElementById('tred').classList.toggle('on',t==='red');document.getElementById('tblue').classList.toggle('on',t==='blue')}
 document.getElementById('tred').onclick=()=>selT('red');document.getElementById('tblue').onclick=()=>selT('blue');document.getElementById('play').onclick=()=>pickTeam(selTeam);
 let dF=0,dS=0;const clock=new THREE.Clock(),hurt=document.getElementById('hurt'),scopeEl=document.getElementById('scope');
-function loop(){try{loop0()}catch(e){loopErr(e);requestAnimationFrame(loop)}}
+let loopTs=performance.now(),chainId=0,frames=0,fpsV=0,fpsT=performance.now();
+function loop(){const n=performance.now();loopTs=n;frames++;if(n-fpsT>1000){fpsV=Math.round(frames*1000/(n-fpsT));frames=0;fpsT=n}try{loop0()}catch(e){loopErr(e)}}
+function startLoop(){const id=++chainId;const f=()=>{if(id!==chainId)return;loop();requestAnimationFrame(f)};f()}
+// сторож: если цикл кадров остановился (не в фоне) — перезапускаем
+setInterval(()=>{if(!document.hidden&&performance.now()-loopTs>2000){loopErr(new Error('цикл остановился — перезапуск'));startLoop()}},1000);
+// мини-статус в игре вдвоём (временно, для отладки)
+(()=>{const d=document.createElement('div');d.id='dbg';d.style.cssText='position:fixed;left:6px;bottom:2px;z-index:150;font:10px/1.2 monospace;color:#9fe3ff;background:#0008;padding:2px 5px;border-radius:5px;pointer-events:none';d.hidden=true;document.body.appendChild(d);
+ setInterval(()=>{try{if(!playing||!FB.game){d.hidden=true;return}d.hidden=false;const n=performance.now();let rx='-';net.rem.forEach(r=>{if(r.rx)rx=Math.round(n-r.rx)});d.textContent='fps '+fpsV+' · друг '+rx+'мс · боты '+bots.length+(FB.host?' · хост':' · снимок '+(FB.snapRx?Math.round(n-FB.snapRx)+'мс':'-'))+' · y '+(me.y|0)+' · sky '+(me.sky|0)+(busOn?' · bus':'')}catch(_){}},500)})();
 let errAt=0;function loopErr(e){window.__lastErr=(e&&e.stack)||String(e);console.error(e);const n=performance.now();if(n-errAt<4000)return;errAt=n;let b=document.getElementById('errbar');if(!b){b=document.createElement('div');b.id='errbar';b.style.cssText='position:fixed;left:8px;right:8px;bottom:4px;z-index:200;background:#7a0000dd;color:#fff;font:12px/1.3 monospace;padding:6px 8px;border-radius:8px;pointer-events:none;word-break:break-all';document.body.appendChild(b)}b.textContent='⚠ '+String((e&&e.message)||e).slice(0,160)+' @ '+(((e&&e.stack)||'').split('\n')[1]||'').trim().slice(-80);b.hidden=false;setTimeout(()=>{b.hidden=true},6000)}
 function loop0(){const dt=Math.min(.05,clock.getDelta());
  if(playing&&busOn){busTick(dt);worldTick(dt);updHud(dt)}else if(playing&&tourT>0){tourTick(dt);worldTick(dt);updHud(dt)}else if(playing){
@@ -2074,8 +2081,8 @@ function loop0(){const dt=Math.min(.05,clock.getDelta());
   const roof=solid.some(b=>(b.y0||0)>p.y+1&&(b.y0||0)<p.y+5&&Math.abs(p.x-b.x)<b.w/2&&Math.abs(p.z-b.z)<b.d/2),cd2=roof?5:7.5,ch=roof?2.3:3.4;C.position.set(p.x-Math.cos(ry)*cd2,p.y+ch,p.z+Math.sin(ry)*cd2);C.lookAt(p.x+Math.cos(ry)*3,p.y+1.2,p.z-Math.sin(ry)*3);C.fov+=(70+Math.abs(drive.v)*.6-C.fov)*Math.min(1,dt*4);C.updateProjectionMatrix()}
  if(playing&&me.sky===1)C.fov+=(88-C.fov)*Math.min(1,dt*3),C.updateProjectionMatrix();
  hintEl.textContent=playing?(FB.game&&me.kn?'🆘 Нокдаун — ползи в укрытие, друг может поднять':FB.game&&nearKnocked()?'💚 Держи E — поднять друга':busOn?busHint():me.zip?'🚡 Едешь по тросу · ПРОБЕЛ — спрыгнуть':nearZip()?'E — схватиться за трос и поехать':me.climb?'🧗 Лезешь по верёвке — держи W':nearWin()?'B — залезть в разбитое окно':me.sky===1?'🪂 Свободное падение · WASD — лететь · ПРОБЕЛ — парашют':me.sky===2?'🪂 Парашют · WASD — управлять':nearShop()?(shopUsed?(shopNPC.robbed?'🧑‍💼 Продавец сдался и сидит на коленях':'🧑‍💼 «Приходи через минуту!»'):(shopNPC.cx>0?'E — поговорить с продавщицей':'E — поговорить с продавцом')+(shopNPC.cx>0&&!owned[SKNIFE]?': она даст ножик 🔪':': аптечка и патроны')):nearDoor()?(nearDoor().open?'E — закрыть дверь':'E — открыть дверь'):drive?`🚗 ${Math.round(Math.abs(drive.v)*3.6)} км/ч · ⛽ ${Math.ceil(drive.fuel||0)}%${nearGas()?' · R — заправить (100 очков)':drive.fuel<=0?' · бензин кончился!':''} · M — радио${radioI?' 📻':''} · E — выйти`:nearCar()?'E — сесть в машину':''):'';
- carFx(dt);buildTick(dt);tourFog();rateT-=dt;if(rateT<=0){rateT=.5;tourRate()}fbTick(dt);emoteTick(dt);secretsTick(dt);busDropTick(dt);busMove(dt);ringTick(dt);dayNight(dt);deathCamTick(dt);netTick(dt);teaserTick(dt);if(FB.specR&&FB.specR.g)FB.specR.g.visible=false;R.render(S,C);if(teaser&&teaser.rec)tzCompose();if(gRec)recCompose();requestAnimationFrame(loop)}
-me={x:0,z:-2,y:1.7,hp:100};score=0;wave=0;loop();
+ carFx(dt);buildTick(dt);tourFog();rateT-=dt;if(rateT<=0){rateT=.5;tourRate()}fbTick(dt);emoteTick(dt);secretsTick(dt);busDropTick(dt);busMove(dt);ringTick(dt);dayNight(dt);deathCamTick(dt);netTick(dt);teaserTick(dt);if(FB.specR&&FB.specR.g)FB.specR.g.visible=false;R.render(S,C);if(teaser&&teaser.rec)tzCompose();if(gRec)recCompose()}
+me={x:0,z:-2,y:1.7,hp:100};score=0;wave=0;startLoop();
 </script>
 
 </html>
