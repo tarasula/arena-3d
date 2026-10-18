@@ -263,7 +263,7 @@ body.touch #chat,body.touch #ammobox{left:max(12px,env(safe-area-inset-left,0px)
 #buildbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--hb,60px) + 64px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;z-index:5;background:#000a;padding:6px;border-radius:14px;border:2px solid #ffcf3f66}
 #buildbar button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 9px;border-radius:10px;font-size:12px;min-width:58px}#buildbar button b{font-size:20px}#buildbar button small{opacity:.6;font-size:10px}
 #buildbar button.on{background:#ffcf3f;color:#2a1300;border-color:#ffcf3f}
-body.touch #buildbar button{min-width:0;padding:4px 7px}body.touch #buildbar button span,body.touch #buildbar button small{display:none}
+body.touch #buildbar button{min-width:0;padding:4px 7px}body.touch #buildbar button span,body.touch #buildbar button small{display:none}body.touch #buildbar #bmatb span{display:block;font-size:10px}body.touch #matl{display:none}body.touch #toast{white-space:normal;width:max-content;max-width:88vw;text-align:center}
 #buildt{position:fixed;border-radius:50%;padding:0;font-size:24px}body.touch #buildt{right:calc(var(--R) + var(--fs) + var(--bs) + 20px);bottom:var(--B);width:var(--bs);height:var(--bs)}
 #buildt.on{background:#ffcf3f}
 #matl{font-weight:800;font-size:14px;white-space:nowrap}#matl span{opacity:.6}
@@ -1503,12 +1503,12 @@ const mats={w:0,m:0},BG=3,pieces=[],pieceKeys=new Set();let build=null;
 const metalT=tex(256,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,0);for(let x=0;x<=8;x++)gr.addColorStop(x/8,x%2?'#9aa3ad':'#c4ccd4');g.fillStyle=gr;g.fillRect(0,0,w,h);g.strokeStyle='#5d656e';g.lineWidth=6;g.strokeRect(3,3,w-6,h-6);g.fillStyle='#4a5058';[[14,14],[w-14,14],[14,h-14],[w-14,h-14],[w/2,14],[w/2,h-14]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,5,0,7);g.fill()})});
 const PMAT={w:M('#fff',{map:plankT,roughness:.85}),m:M('#fff',{map:metalT,roughness:.4,metalness:.55})},PHP={w:150,m:320},PCOST=10,PNAME={wall:'Стена',floor:'Пол',stair:'Лестница'};
 const ghostM=new THREE.MeshBasicMaterial({color:'#4dc3ff',transparent:true,opacity:.35,depthWrite:false});const ghost=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),ghostM);ghost.visible=false;S.add(ghost);
-function harvest(t,p){const n=t==='w'?8:6;mats[t]+=n;spark(p,t==='w'?'#c89b5a':'#ccd',5,2.5);snd('punch',.7);toast(t==='w'?`🪵 +${n} дерева (${mats.w})`:`🔩 +${n} металла (${mats.m})`,t==='w'?'#e0b27a':'#c9ced6');questAdd('mat',n)}
+function harvest(t,p){const n=t==='w'?8:6;mats[t]+=n;if(build)updBuildBar();spark(p,t==='w'?'#c89b5a':'#ccd',5,2.5);snd('punch',.7);toast(t==='w'?`🪵 +${n} дерева (${mats.w})`:`🔩 +${n} металла (${mats.m})`,t==='w'?'#e0b27a':'#c9ced6');questAdd('mat',n)}
 function toggleBuild(on){if(on===undefined)on=!build;if(on&&(busOn||drive||dying||!playing))return;build=on?{piece:(build&&build.piece)||'wall',mat:(build&&build.mat)||(mats.w>=PCOST||mats.m<PCOST?'w':'m')}:null;
- document.getElementById('buildbar').hidden=!build;document.getElementById('buildt').classList.toggle('on',!!build);ghost.visible=false;if(build){aiming=false;updBuildBar();toast('🔨 Строительство: клик — поставить · 1/2/3 — стена/пол/лестница · R — материал · X — выйти','#ffcf3f')}}
+ document.getElementById('buildbar').hidden=!build;document.getElementById('buildt').classList.toggle('on',!!build);ghost.visible=false;if(build){aiming=false;updBuildBar();toast(touch?'🔨 Строй: выбери стену, пол или лестницу и жми 🧱':'🔨 Строительство: клик — поставить · 1/2/3 — стена/пол/лестница · R — материал · X — выйти','#ffcf3f')}}
 function setPiece(k){if(!build)toggleBuild(true);if(build){build.piece=k;updBuildBar()}}
 function setBMat(){if(!build)return;build.mat=build.mat==='w'?'m':'w';updBuildBar()}
-function updBuildBar(){const bb=document.getElementById('buildbar');bb.querySelectorAll('[data-pc]').forEach(b=>b.classList.toggle('on',build&&b.dataset.pc===build.piece));const mb=document.getElementById('bmatb');if(build)mb.innerHTML=build.mat==='w'?`<b>🪵</b><span>Дерево ${mats.w}</span><small>R</small>`:`<b>🔩</b><span>Металл ${mats.m}</span><small>R</small>`}
+function updBuildBar(){const bb=document.getElementById('buildbar');bb.querySelectorAll('[data-pc]').forEach(b=>b.classList.toggle('on',build&&b.dataset.pc===build.piece));const mb=document.getElementById('bmatb');if(build)mb.innerHTML=build.mat==='w'?`<b>🪵</b><span>${touch?'':'Дерево '}${mats.w}</span><small>R</small>`:`<b>🔩</b><span>${touch?'':'Металл '}${mats.m}</span><small>R</small>`}
 document.getElementById('buildbar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.stopPropagation();if(b.dataset.pc)setPiece(b.dataset.pc);else if(b.dataset.bm)setBMat();else if(b.dataset.bx)toggleBuild(false)});
 document.getElementById('buildbar').addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
 document.getElementById('buildt').addEventListener('click',e=>{e.stopPropagation();toggleBuild()});
