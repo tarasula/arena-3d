@@ -1451,7 +1451,7 @@ function hitRemote(r,dmg,pt,id,w,head){if(!r.alive)return;if(r.team===myTeam){sp
  dmg*=god?2:1;net.dmg.set(r.peer,(net.dmg.get(r.peer)||0)+dmg);if(r.lastShot!==id){r.lastShot=id;score+=100}r.lastHead=!!head;r.lastIcon=w.ic;spark(pt,'#9b1c1c',5,3);dmgNum(pt,Math.round(dmg),head);hitMark();sendPresence(true)}
 function sendPresence(force){if(!net.room)return;const n=performance.now();if(!force&&n-net.sendT<(FB.game?110:70))return;net.sendT=n;const r2=v=>Math.round(v*100)/100;
  const d=[];net.dmg.forEach((v,k)=>{if(net.rem.has(k))d.push([k,Math.round(v)])});
- try{net.room.presence({v:1,on:playing?1:0,nick:myNick,team:myTeam,x:r2(me.x),y:r2(me.y),z:r2(me.z),yaw:r2(yaw),pitch:r2(pitch),cr:r2(me.cr||0),w:wi,hp:Math.round(me.hp),alive:dying?0:1,f:net.fires,dmg:d.slice(0,12),deaths:net.deaths,killer:net.killer,god:god?1:0,bus:busOn?1:0,sky:me.sky||0,skin:PROF.skin,kn:me.kn?1:0,rv:revive?revive.uid:'',sh:Math.round(me.sh||0),cn:net.chatN||0,ct:net.chatT||'',cl:me.climb?1:0,zp:me.zip?1:0,ad:aiming?1:0,dr:drive?1:0,rl:rollT>0?1:0,em:me.emote?me.emote.id:''}).catch(()=>{})}catch(e){}}
+ try{net.room.presence({v:1,on:playing?1:0,nick:myNick,team:myTeam,x:r2(me.x),y:r2(me.y),z:r2(me.z),yaw:r2(yaw),pitch:r2(pitch),cr:r2(me.cr||0),w:wi,hp:Math.round(me.hp),alive:dying?0:1,f:net.fires,dmg:d.slice(0,12),deaths:net.deaths,killer:net.killer,god:god?1:0,bus:busOn?1:0,sky:me.sky||0,skin:PROF.skin,kn:me.kn?1:0,rv:revive?revive.uid:'',sh:Math.round(me.sh||0),cn:net.chatN||0,ct:net.chatT||'',cl:me.climb?1:0,zp:me.zip?1:0,ad:aiming?1:0,dr:drive?1:0,cx:drive?r2(drive.g.position.x):0,cy:drive?r2(drive.g.position.y):0,cz:drive?r2(drive.g.position.z):0,cry:drive?r2(drive.g.rotation.y):0,csk:drive?PROF.car:'',rl:rollT>0?1:0,em:me.emote?me.emote.id:''}).catch(()=>{})}catch(e){}}
 function onRemote(p){if(p.sameTab){net.me=p.peer;return}if(p.kind!=='viewer')return;const pr=p.presence||{};if(pr.v!==1)return;
  let r=net.rem.get(p.peer);const nick=str(pr.nick)||'Игрок',team=pr.team==='blue'?'blue':'red';
  if(!r){r={peer:p.peer,nick,team,f:num(pr.f),seenDeaths:num(pr.deaths),seenDmg:null,ph:0};net.rem.set(p.peer,r);toast(`👋 ${nick} зашёл в игру (${team==='red'?'красные':'синие'})`,'#fff')}
@@ -1467,12 +1467,18 @@ async function netInit(){const lob=document.getElementById('lobby');let room=nul
  try{room=window.claude&&window.claude.use?await window.claude.use('room'):null}catch(_){}
  if(!room){lob.textContent='🎮 Игра с ботами. Прогресс и короны сохраняются в этом браузере.';{const sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;if(touch&&!sa){const d=document.createElement('div');d.style.cssText='margin-top:6px;color:#ffcf3f';d.textContent=/iPhone|iPad|iPod/.test(navigator.userAgent)?'📲 Совет: «Поделиться» → «На экран „Домой“» — игра откроется на весь экран':'📲 Совет: меню браузера → «Добавить на главный экран» — игра откроется на весь экран';lob.appendChild(d)}}return}
  net.room=room;lob.textContent='🌐 Онлайн! Ждём друзей — отправь им ссылку на эту игру.';
- room.onPeers(ch=>{ch.left.forEach(p=>{const r=net.rem.get(p.peer);if(r){if(r.g)S.remove(r.g);net.rem.delete(p.peer);toast(`${r.nick} вышел из игры`,'#aaa')}});ch.peers.forEach(onRemote);renderLobby()},
+ room.onPeers(ch=>{ch.left.forEach(p=>{const r=net.rem.get(p.peer);if(r){if(r.g)S.remove(r.g);if(r.gcar)S.remove(r.gcar);if(r.twin&&r.twin.g)r.twin.g.visible=true;net.rem.delete(p.peer);toast(`${r.nick} вышел из игры`,'#aaa')}});ch.peers.forEach(onRemote);renderLobby()},
   ()=>{net.room=null;lob.textContent='🎮 Одиночная игра (сеть недоступна)'});sendPresence(true)}
 function renderLobby(){const lob=document.getElementById('lobby');if(!net.room)return;const list=[...net.rem.values()];
  lob.innerHTML=list.length?'🌐 Сейчас здесь: '+list.map(r=>`<b style="color:${r.team==='red'?'#ff7b7b':'#7bb0ff'}">${esc(r.nick)}</b> (${r.team==='red'?'красные':'синие'}, ${r.p&&r.p.on?'в игре':'в меню'})`).join(', ')+'<br>Выбери ту же команду, чтобы играть вместе, или другую — чтобы сражаться!':'🌐 Онлайн! Ждём друзей — отправь им ссылку на эту игру.'}
 function netTick(dt){sendPresence(false);
- net.rem.forEach(r=>{const p=r.p;if(!r.g||!p)return;const vis=!!p.on&&!!p.alive&&!p.bus;if(r.chute){const on=num(p.sky)===2;if(on&&!r.chute.visible)r.chute.scale.setScalar(.05);r.chute.visible=on;if(on&&r.chute.scale.x<1)r.chute.scale.setScalar(Math.min(1,r.chute.scale.x+dt*2.2))}r.g.visible=vis;if(!vis)return;const u=r.g.userData,gp=r.g.position;
+ net.rem.forEach(r=>{const p=r.p;if(!r.g||!p)return;const vis=!!p.on&&!!p.alive&&!p.bus;if(r.chute){const on=num(p.sky)===2;if(on&&!r.chute.visible)r.chute.scale.setScalar(.05);r.chute.visible=on;if(on&&r.chute.scale.x<1)r.chute.scale.setScalar(Math.min(1,r.chute.scale.x+dt*2.2))}const dr=vis&&num(p.dr)===1;
+  if(dr){const tx0=num(p.cx),tz0=num(p.cz),ty0=num(p.cy),ry0=num(p.cry);if(!r.gcar){const g0=car(0,0,0,'#c8352b',true);g0.userData.ghost=1;g0.position.set(tx0,ty0,tz0);g0.rotation.y=ry0;r.gcar=g0;r.drv=0}
+   const g=r.gcar;if(!r.drv){r.drv=1;let best=null,bd=6;traffic.concat(ringCars).forEach(t=>{if(!t.g||!t.g.visible||t.g.userData.ghost)return;const d=Math.hypot(t.g.position.x-tx0,t.g.position.z-tz0);if(d<bd){bd=d;best=t}});if(best){best.g.visible=false;r.twin=best}}
+   const sk0=str(p.csk,20);if(g.userData.skid!==sk0){g.userData.skid=sk0;try{applyCarSkin(g,sk0)}catch(_){}}
+   g.visible=true;const kc=Math.min(1,dt*14);if(Math.hypot(tx0-g.position.x,tz0-g.position.z)>15)g.position.set(tx0,ty0,tz0);else{g.position.x+=(tx0-g.position.x)*kc;g.position.z+=(tz0-g.position.z)*kc;g.position.y+=(ty0-g.position.y)*kc}
+   let dr0=ry0-g.rotation.y;dr0=Math.atan2(Math.sin(dr0),Math.cos(dr0));g.rotation.y+=dr0*kc}else if(r.gcar)r.drv=0;
+  r.g.visible=vis&&!dr;if(!vis)return;const u=r.g.userData,gp=r.g.position;
   const tx=num(p.x),tz=num(p.z),ty=num(p.y,1.7)-(1.7-num(p.cr)*.65),k=Math.min(1,dt*12),ox=gp.x,oz=gp.z;
   if(Math.hypot(tx-gp.x,tz-gp.z)>8)gp.set(tx,ty,tz);else{gp.x+=(tx-gp.x)*k;gp.z+=(tz-gp.z)*k;gp.y+=(ty-gp.y)*k}
   let da=num(p.yaw)+Math.PI-r.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));r.g.rotation.y+=da*Math.min(1,dt*14);
@@ -1770,6 +1776,8 @@ document.getElementById('frbody').addEventListener('click',async e=>{const b=e.t
  else if(a==='gift'){FB.giftOpen=true;FB.plusOpen=false;FB.giftSel=null;renderFr()}
  else if(a==='gc'){FB.giftSel={t:'c',v:+b.dataset.n};renderFr()}
  else if(a==='gs'){FB.giftSel={t:'s',v:b.dataset.sk};renderFr()}
+ else if(a==='gv'){FB.giftSel={t:'v'};renderFr()}
+ else if(a==='gt'){FB.giftSel={t:'t'};renderFr()}
  else if(a==='gno'){FB.giftSel=null;renderFr()}
  else if(a==='gback'){FB.giftOpen=false;FB.giftSel=null;renderFr()}
  else if(a==='gok')sendGift();
@@ -1798,8 +1806,8 @@ const GIFT_C=[10,25,50,100,250,500];
 function giftHTML(id){const nm=esc(frNick(id)),sel=FB.giftSel;
  const sk=PROF.owned.map(i=>SKINS.find(k=>k.id===i)).filter(k=>k&&k.id!=='rookie'&&!k.pass&&!k.vip);
  let h=`<div class="fri"><button data-act="gback">← Назад</button><span class="nm">🎁 Подарок для ${nm}</span></div><div class="pcard"><p>У тебя 👑 <b>${isInf()?'∞':PROF.crowns}</b></p>`;
- if(sel){const txt=sel.t==='c'?sel.v+' 👑':'скин «'+esc((SKINS.find(k=>k.id===sel.v)||{}).n||'')+'»';h+=`<h3>Подарить ${txt}?</h3>${sel.t==='s'?'<p>Скин перейдёт к другу, у тебя его больше не будет.</p>':''}<div class="gopts"><button class="g" data-act="gok" style="background:#5ddc7a;color:#062b12;border-color:#5ddc7a">Да, подарить</button><button data-act="gno">Отмена</button></div></div>`;return h}
- h+=`<h3>Короны</h3><div class="gopts">${GIFT_C.map(n=>`<button data-act="gc" data-n="${n}"${PROF.crowns<n?' disabled':''}>${n} 👑</button>`).join('')}</div><h3>Скин</h3><div class="gopts">${sk.length?sk.map(k=>`<button data-act="gs" data-sk="${k.id}">${esc(k.n)}</button>`).join(''):'<small>Нет скинов, которые можно подарить (кроме стартового, пасса и VIP)</small>'}</div></div>`;return h}
+ if(sel){const txt=sel.t==='c'?sel.v+' 👑':sel.t==='v'?'VIP-пасс':sel.t==='t'?'билет в турнир':'скин «'+esc((SKINS.find(k=>k.id===sel.v)||{}).n||'')+'»';h+=`<h3>Подарить ${txt}?</h3>${sel.t==='s'?'<p>Скин перейдёт к другу, у тебя его больше не будет.</p>':''}<div class="gopts"><button class="g" data-act="gok" style="background:#5ddc7a;color:#062b12;border-color:#5ddc7a">Да, подарить</button><button data-act="gno">Отмена</button></div></div>`;return h}
+ h+=`<h3>Короны</h3><div class="gopts">${GIFT_C.map(n=>`<button data-act="gc" data-n="${n}"${PROF.crowns<n?' disabled':''}>${n} 👑</button>`).join('')}</div><h3>Скин</h3><div class="gopts">${sk.length?sk.map(k=>`<button data-act="gs" data-sk="${k.id}">${esc(k.n)}</button>`).join(''):'<small>Нет скинов, которые можно подарить (кроме стартового, пасса и VIP)</small>'}</div>${PROF.owner?'<h3>Особое (только владелец)</h3><div class="gopts"><button data-act="gv">⭐ VIP-пасс</button><button data-act="gt">🏆 Билет в турнир</button></div>':''}</div>`;return h}
 // ===== 🎁 подарки и выдача через личный чат (новых правил Firebase не нужно) =====
 const GPUB={"kty": "EC", "crv": "P-256", "x": "qyokejm7kKKVIcdCfT22nvFxEIBivIa4uEGyqQeEovU", "y": "y8J6rQaBEcuiv37Jauv4k-RX99GJ_Xa5o878O7ziXAo"},GWRAP={"s": "V9Fhw3xaxJQYnI6nTr24GQ==", "i": "Yfc3yQrWuIa4pDGe", "c": "28oTAiV3+SCS+LRAx+GMUNlLAgJtjxWBqFDFI9uYI5qXyL7py3RDWacjpbM3Pc7dlj7aIfkn5WH91din3qr4R2AKEC5K8m9+f7vPbpRwvnEmgXuoyrfPAz5STuq5UQagnc+B0OaAF2aEB+1cgL2m4aEKLaiz8trgNU/VdcLJj4dJnzLTa6cfWnWJ729Jl5DAJrKlWZV/G/ii39Hc14YiaL11MZpsSXzZnGjRU/yldwFAmNQ5i0z7zN3yjTfwaSvsJryo5aNW4wLvY+262jcKr3gdRIH59CbMBkQEMbPe"},GSIGNED=new Set(['vip','tour','tk','cr']);let OKEY=null;
 const b64u=u=>btoa(String.fromCharCode(...new Uint8Array(u))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1829,6 +1837,7 @@ async function gApply(key,m,fid){try{const t=str(m.text,400);if(!t.startsWith('G
 function gScan(entries,fid){entries.forEach(([k,m])=>{if(m&&typeof m==='object'&&typeof m.text==='string'&&m.text.startsWith('GFT1|'))gApply(k,m,fid)})}
 async function gScanChat(fid){try{const sn=await FB.db.ref('chats/'+chatId(FB.uid,fid)).limitToLast(10).once('value');gScan(Object.entries(sn.val()||{}),fid)}catch(_){}}
 function sendGift(){const sel=FB.giftSel,id=FB.chatWith;if(!sel||!id||!FB.ok||FB.banned)return;let g,txt;
+ if(sel.t==='v'||sel.t==='t'){if(!PROF.owner||!OKEY){setNote('✖ Введи код владельца ещё раз (7 нажатий на счётчик корон в меню)','#ff6b6b');FB.giftSel=null;renderFr();return}const kk=sel.t==='v'?'vip':'tour',tx=sel.t==='v'?'VIP-пасс':'билет в турнир';FB.giftSel=null;FB.giftOpen=false;FB.plusOpen=false;setNote('⏳ Отправляю: '+tx+'…','#ffd23f');gSend(id,kk,'1').then(()=>{setNote('✔ Отправлено: '+tx,'#5ddc7a');chime([784,988,1319],.08)}).catch(e=>setNote('✖ Не отправилось: '+(e.message||e.code||'ошибка'),'#ff6b6b'));return}
  if(sel.t==='c'){const n=sel.v;if(!(n>0&&PROF.crowns>=n)){toast('Не хватает корон','#ff9f9f');return}PROF.crowns-=n;g={k:'gc',v:String(n),t:'c',n};txt=n+' 👑'}
  else{const k=SKINS.find(q=>q.id===sel.v);if(!k||k.id==='rookie'||k.pass||k.vip||!PROF.owned.includes(k.id)){toast('Этот скин нельзя подарить','#ff9f9f');return}PROF.owned=PROF.owned.filter(x=>x!==k.id);if(PROF.skin===k.id){PROF.skin='rookie';try{buildLobbyChar('rookie')}catch(_){}}g={k:'gs',v:k.id,t:'s',s:k.id};txt='скин «'+k.n+'»'}
  saveProf();renderShop();FB.giftSel=null;FB.giftOpen=false;FB.plusOpen=false;setNote('⏳ Отправляю подарок: '+txt+'…','#ffd23f');
@@ -1881,7 +1890,7 @@ function gListen(ref,evn,fn){ref.on(evn,fn,()=>{});FB.grefs.push([ref,evn,fn])}
 function fbRoom(gref){const ref=gref.child('p');let prev={};ref.child(FB.uid).onDisconnect().remove();
  return{presence(o){return ref.child(FB.uid).set(o)},onPeers(fn){gListen(ref,'value',sn=>{const v=sn.val()||{};const peers=[],left=[];Object.keys(v).forEach(k=>{if(k!==FB.uid)peers.push({peer:k,kind:'viewer',presence:v[k]})});Object.keys(prev).forEach(k=>{if(k!==FB.uid&&!v[k])left.push({peer:k})});prev=v;fn({peers,left})})},off(){ref.child(FB.uid).remove().catch(()=>{})}}}
 function startPartyGame(v){FB.autoGo=null;if(FB.game)endPartyGame();FB.game=v.g;FB.host=v.leader===FB.uid;FB.leader=v.leader;FB.teamN=Math.max(1,Object.keys(v.m||{}).length);FB.hostLeft=TOTAL;FB.botNames={};FB.spec=false;FB.specDone=false;busAngle=v.ang;
- const gref=FB.db.ref('games/'+v.g);FB.gref=gref;net.rem.forEach(r=>{if(r.g)S.remove(r.g)});net.rem.clear();net.me=FB.uid;net.room=fbRoom(gref);
+ const gref=FB.db.ref('games/'+v.g);FB.gref=gref;net.rem.forEach(r=>{if(r.g)S.remove(r.g);if(r.gcar)S.remove(r.gcar);if(r.twin&&r.twin.g)r.twin.g.visible=true});net.rem.clear();net.me=FB.uid;net.room=fbRoom(gref);
  net.room.onPeers(ch=>{ch.left.forEach(pp=>{const r=net.rem.get(pp.peer);if(r){if(r.g)S.remove(r.g);net.rem.delete(pp.peer);toast(r.nick+' вышел из игры','#aaa')}if(pp.peer===FB.leader&&!FB.host&&playing)hostGone()});ch.peers.forEach(onRemote)});
  if(FB.host)gListen(gref.child('hits'),'child_added',onNetHit);else{gListen(gref.child('bs'),'value',sn=>onBotSnap(sn.val()));gListen(gref.child('bn'),'child_added',sn=>{FB.botNames[sn.key]=sn.val()||{};const b=bots.find(q=>q.remote&&String(q.nid)===sn.key);if(b)nameRemoteBot(b)})}
  gListen(gref.child('dmg/'+FB.uid),'child_added',sn=>{const d=sn.val();sn.ref.remove();if(d)netDamage(d)});
