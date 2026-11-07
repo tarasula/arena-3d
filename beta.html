@@ -3006,7 +3006,7 @@ function jumpSlash(w){const f=new THREE.Vector3(0,0,-1).applyQuaternion(C.quater
  tracer(from,new THREE.Vector3(me.x,me.y-.3,me.z),w.col);for(let i=0;i<3;i++)tracer(new THREE.Vector3(tp.x,tp.y+2.2,tp.z-.6+i*.6),new THREE.Vector3(tp.x,tp.y+.4,tp.z+.6-i*.6),'#ffffff');
  spark(new THREE.Vector3(tp.x,tp.y+1.3,tp.z),w.col,22,7);hitBot(best,9999,{id:++shotId,melee:1,icon:w.ic});hitMark();cd=w.cd;recoil=1;shakeT=.3;snd('punch',1);chime([1320,1760],.04,'sawtooth',.08);useBlade(wi);return true}
 // ---- золотой волк-помощник на заправке (оборотень в полный рост) ----
-const WF={g:null,tag:null,bar:null,bub:null,hp:300,max:300,sh:100,shm:100,sbar:null,alive:0,on:0,home:{x:36,z:-30.5},leg:[],arm:[],fore:[],head:null,jaw:null,brow:[],eye:[],tail:null,blade:null,ph:0,tcd:0,mcd:0,bt:0,rec:[],stuck:0,lx:0,lz:0,sk:0,emo:'idle',et:0,swing:0,hurtT:0,btex:{},die:0,idleT:6,pj:0,ja:0,ha:0,ar:[0,0],ay:0};
+const WF={g:null,tag:null,bar:null,bub:null,hp:5000,max:5000,sh:100,shm:100,sbar:null,alive:0,on:0,home:{x:36,z:-30.5},leg:[],arm:[],fore:[],head:null,jaw:null,brow:[],eye:[],tail:null,blade:null,ph:0,tcd:0,mcd:0,bt:0,rec:[],stuck:0,lx:0,lz:0,sk:0,emo:'idle',et:0,swing:0,hurtT:0,btex:{},die:0,idleT:6,pj:0,ja:0,ha:0,ar:[0,0],ay:0};
 const WSC=1.0;
 function wolfBuild(){if(WF.g)return;const g=new THREE.Group(),
  gd=M('#e8b923',{metalness:.45,roughness:.4,emissive:'#7a5200',emissiveIntensity:.3}),dg=M('#b8860b',{metalness:.4,roughness:.5,emissive:'#4a3000',emissiveIntensity:.25}),lt=M('#fff1b0',{metalness:.2,roughness:.55,emissive:'#7a6000',emissiveIntensity:.2}),dk=M('#2a1d05',{roughness:.6}),ws=M('#f4f4ee',{roughness:.4}),
@@ -3054,7 +3054,7 @@ function wolfTick(dt){if(!WF.g)return;
  if(WF.die){WF.die+=dt;const k=Math.min(1,WF.die/1.1);WF.g.rotation.x=-k*Math.PI/2;WF.g.position.y=-k*.4;WF.jaw.rotation.x=.5*k;if(WF.die>3){WF.g.visible=false;WF.die=0;WF.g.rotation.x=0}WF.bub.visible=false;return}
  if(!WF.alive)return;if(!playing||tourneyOn){WF.g.visible=WF.tag.visible=false;return}WF.g.visible=WF.tag.visible=true;
  const p=WF.g.position,dm=Math.hypot(me.x-p.x,me.z-p.z),t=clock.elapsedTime;
- if(!WF.on&&dm<10&&!dying&&me.y<5){WF.on=1;WF.mad=1;announce('🔥 БОТЫ СОШЛИ С УМА — ОНИ ИГРАЮТ КАК БОГИ','#ff5a3a');wolfEmo('howl','🐺',2.4);announce('🐺 ЗОЛОТОЙ ВОЛК С ТОБОЙ!','#ffd23f');toast('🐺 Волк будет драться за тебя. Брось ему аптечку (выброс предмета), чтобы вылечить','#ffd23f');chime([523,659,784,1047],.07)}
+ if(!WF.on&&dm<10&&!dying&&me.y<5){WF.on=1;WF.mad=1;wolfEmo('howl','🐺',2.4);announce('🐺 ЗОЛОТОЙ ВОЛК С ТОБОЙ!','#ffd23f');toast('🐺 Волк будет драться за тебя. Брось ему аптечку (выброс предмета), чтобы вылечить','#ffd23f');chime([523,659,784,1047],.07)}
  if(!WF.on&&dm<28&&WF.emo==='idle'&&WF.idleT-->0&&Math.random()<.01)wolfEmo('wave','👋',1.8);
  let moving=0,tg=null;
  if(WF.on&&!dying){
@@ -3066,16 +3066,16 @@ function wolfTick(dt){if(!WF.g)return;
    if(false&&WF.mcd<=0){WF.mcd=2.6;WF.swing=.4;const ux=(q.x-p.x)/(d||1),uz=(q.z-p.z)/(d||1);let n=0;bots.forEach(b=>{if(b.dead||b.remote||b.guard||b.isl)return;const o=b.g.position,rx=o.x-p.x,rz=o.z-p.z,pr=rx*ux+rz*uz;if(pr>-1&&pr<d+2&&Math.abs(rx*uz-rz*ux)<2.6){n++;spark(new THREE.Vector3(o.x,1.3,o.z),'#7be0ff',16,6);hitBot(b,9999,{id:++shotId,melee:1,icon:'⚡'})}});
     tracer(new THREE.Vector3(p.x,1.6,p.z),new THREE.Vector3(q.x,1.2,q.z),'#7be0ff');const nx=q.x-ux*2.2,nz=q.z-uz*2.2;if(!pBlocked(nx,nz,.5,0)){p.x=nx;p.z=nz}snd('punch',.9);chime([1760,880],.04,'sawtooth',.08);wolfEmo('roar',n>1?'🤩':'😡',1.2);if(n>1)announce('🐺⚡ ×'+n,'#7be0ff')}
   }else{
-   let med=null,md=14;if(WF.hp<WF.max-30)loot.forEach(l=>{if(l.taken||l.i!==-1)return;const d=Math.hypot(l.x-p.x,l.z-p.z);if(d<md){md=d;med=l}});
+   let med=null,md=14;if(WF.hp<WF.max-300)loot.forEach(l=>{if(l.taken||l.i!==-1)return;const d=Math.hypot(l.x-p.x,l.z-p.z);if(d<md){md=d;med=l}});
    if(med){wolfFace(Math.atan2(-(med.x-p.x),-(med.z-p.z)),dt);if(md>2)moving=wolfStep(p,med.x,med.z,8,dt)?1:0}
    else if(dm>5){wolfFace(Math.atan2(-(me.x-p.x),-(me.z-p.z)),dt);moving=wolfStep(p,me.x,me.z,dm>20?12:8,dt)?1:0;if(dm>70&&me.y<5){for(let q=0;q<20;q++){const an=Math.random()*6.28,x=me.x+Math.cos(an)*5,z=me.z+Math.sin(an)*5;if(!pBlocked(x,z,.5,0)){p.x=x;p.z=z;spark(new THREE.Vector3(x,1,z),'#ffd23f',12,5);break}}}}
    else{wolfFace(Math.atan2(-(me.x-p.x),-(me.z-p.z)),dt);if(WF.emo==='idle'&&Math.random()<.004)wolfEmo('happy',['😎','🐾','😋','💪'][Math.random()*4|0],1.6)}}
  }else if(!WF.on&&dm<35)wolfFace(Math.atan2(-(me.x-p.x),-(me.z-p.z)),dt);
- if(WF.on&&WF.hp<WF.max)loot.forEach(l=>{if(l.taken||l.i!==-1)return;if(Math.hypot(l.x-p.x,l.z-p.z)<3.2&&!(l.np>0)){l.taken=1;S.remove(l.g);WF.hp=Math.min(WF.max,WF.hp+100);spark(new THREE.Vector3(p.x,2.5,p.z),'#4dff88',24,6);toast('🐺 Волк вылечен +100 ❤ ('+Math.round(WF.hp)+')','#4dff88');chime([660,880,1100],.06);wolfEmo('happy','🥰',2)}});
+ if(WF.on&&WF.hp<WF.max)loot.forEach(l=>{if(l.taken||l.i!==-1)return;if(Math.hypot(l.x-p.x,l.z-p.z)<3.2&&!(l.np>0)){l.taken=1;S.remove(l.g);WF.hp=Math.min(WF.max,WF.hp+500);spark(new THREE.Vector3(p.x,2.5,p.z),'#4dff88',24,6);toast('🐺 Волк вылечен +500 ❤ ('+Math.round(WF.hp)+')','#4dff88');chime([660,880,1100],.06);wolfEmo('happy','🥰',2)}});
  if(WF.on){WF.bt-=dt;WF.rec=WF.rec.filter(r=>t-r.t<1.0);
   if(WF.bt<=0){WF.bt=.5;bots.forEach(b=>{if(b.dead||b.remote||b.guard||b.isl||!b.armed||b.ammo<=0)return;const q=b.g.position,d=Math.hypot(q.x-p.x,q.z-p.z);if(d>26||Math.abs((b.by||0))>2)return;if(Math.random()<.35){b.ammo--;wolfHurt(12+Math.random()*8);WF.hurtT=.35;WF.rec.push({t,b});tracer(new THREE.Vector3(q.x,1.35,q.z),new THREE.Vector3(p.x,3,p.z),'#ffd27a');spark(new THREE.Vector3(p.x,3,p.z),'#ffd23f',4,3)}});
    if(WF.hurtT>0&&WF.emo!=='roar'&&WF.emo!=='howl')wolfEmo('hurt',WF.hp<WF.max*.3?'😰':'😖',.9);
-   if(new Set(WF.rec.map(r=>r.b)).size>=3){WF.hp=0;wolfEmo('sad','😢',3);wolfDie('🐺 ВОЛКА УБИЛИ ТРОЕ!')}else if(WF.hp<=0){wolfEmo('sad','😢',3);wolfDie()}}}
+   if(WF.hp<=0){wolfEmo('sad','😢',3);wolfDie()}}}
  if(!WF.alive)return;
  // эмоции -> поза
  WF.et-=dt;if(WF.et<=0)WF.emo='idle';WF.hurtT=Math.max(0,WF.hurtT-dt);if(WF.bub.visible){WF.bt2-=dt;if(WF.bt2<=0)WF.bub.visible=false}
