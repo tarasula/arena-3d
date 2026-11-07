@@ -1135,7 +1135,7 @@ const feedEl=document.getElementById('feed'),annEl=document.getElementById('ann'
 function setH(el,h){if(el._h!==h){el._h=h;el.innerHTML=h}}
 function toast(t,c){toastEl.textContent=t;toastEl.style.color=c||'#fff';toastEl.classList.remove('show');void toastEl.offsetWidth;toastEl.classList.add('show')}
 function feed(h){const d=document.createElement('div');d.innerHTML=h;feedEl.prepend(d);setTimeout(()=>d.remove(),5000);while(feedEl.children.length>5)feedEl.lastChild.remove()}
-const annQ=[];let annBusy=false;function announce(t,c){annQ.push([t,c]);if(!annBusy)nextAnn()}
+const annQ=[];let annBusy=false;function announce(t,c){}
 function nextAnn(){const n=annQ.shift();if(!n){annBusy=false;return}annBusy=true;annEl.textContent=n[0];annEl.style.color=n[1];annEl.classList.remove('show');void annEl.offsetWidth;annEl.classList.add('show');chime([523,784,1047],.06,'square',.07);setTimeout(nextAnn,annQ.length?750:1100)}
 const dns=[];function dmgNum(p,v,head){const el=document.createElement('div');el.className='dn'+(head?' h':'');el.textContent=v;document.body.appendChild(el);dns.push({el,p:p.clone().add(new THREE.Vector3((Math.random()-.5)*.4,.2,0)),t:0})}
 // каждое попадание = 100 очков (за выстрел, а не за каждую дробинку)
@@ -2009,7 +2009,7 @@ function person(sc){const g=new THREE.Group(),sh=M(sc||shirts[Math.random()*6|0]
  g.userData={hips,spine,head,legs,arms,gun,mats:{sh,pn,sk,hair}};return g}
 let me,bots=[],shots=[],parts=[],score,wave,yaw=0,pitch=0,cd=0,vy=0,playing=false,keys={},firing=false,bob=0,recoil=0;
 const bn=document.getElementById('banner'),fade=document.getElementById('fade');let bnT=0;
-function banner(t,sub=''){bn.innerHTML=t+(sub?'<small>'+sub+'</small>':'');bn.classList.remove('show');void bn.offsetWidth;bn.classList.add('show');clearTimeout(bnT);bnT=setTimeout(()=>bn.classList.remove('show'),1800)}
+function banner(t,sub=''){return;bn.innerHTML=t+(sub?'<small>'+sub+'</small>':'');bn.classList.remove('show');void bn.offsetWidth;bn.classList.add('show');clearTimeout(bnT);bnT=setTimeout(()=>bn.classList.remove('show'),1800)}
 let dying=false;
 const SECRETS=[{x:-117,z:-117,y:0,n:'Пыльный угол Склада'},{x:117,z:117,y:0,n:'Конец кольцевой'},{x:117,z:-117,y:0,n:'Северо-восточный край'},{x:-117,z:117,y:0,n:'Забытый угол города'},{x:-66.5,z:36.5,y:16,n:'Крыша Многоэтажки'},{x:-30,z:6,y:0,n:'Тень острова'},{x:-38,z:12,y:ISL.top,n:'Край Острова сокровищ'}];
 SECRETS.forEach(q=>{const m=new THREE.Mesh(new THREE.OctahedronGeometry(.32),new THREE.MeshStandardMaterial({color:'#b46bff',emissive:'#7a2bff',emissiveIntensity:.9,metalness:.3,roughness:.3}));m.position.set(q.x,q.y+.8,q.z);S.add(m);q.m=m});
