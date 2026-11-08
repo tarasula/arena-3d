@@ -3157,6 +3157,17 @@ function bbList(ix,iz,fx,fz,tiers){const L2=[],E=(sx,sz,y)=>bbEdge(ix,iz,sx,sz,y
  for(let t=0;t<tiers;t++){const y=t*BG;[[fx,fz],[fz,fx],[-fz,-fx],[-fx,-fz]].forEach(([a,c],k)=>{if(t===0&&k===2)return;L2.push(E(a,c,y))});const cx=(ix+.5)*BG,cz=(iz+.5)*BG,fy=(t+1)*BG;L2.push({k:'floor',x:cx,z:cz,y:fy-.25,w:BG,d:BG,h:.25,key:`f${cx},${cz},${fy}`,q:1})}
  const bx=(ix-fx+.5)*BG,bz=(iz-fz+.5)*BG;L2.push({k:'stair',x:bx,z:bz,y:0,w:BG,d:BG,h:BG,dx:fx,dz:fz,key:`s${bx},${bz},0`,q:1});return L2}
 function bbPlace(b,n){for(let q=0;q<n&&b.bi<b.bl.length;q++){const sp=b.bl[b.bi++];if(pieceKeys.has(sp.key)||Math.abs(sp.x)>L-2||Math.abs(sp.z)>L-2||pieces.length>=470)continue;if(!dying&&me.y<4&&Math.abs(me.x-sp.x)<sp.w/2+.7&&Math.abs(me.z-sp.z)<sp.d/2+.7&&sp.k!=='floor')continue;makePiece(sp,b.mat||'m');b.bbT=.3;spark(new THREE.Vector3(sp.x,sp.y+1,sp.z),sp.k==='floor'?'#ffd9a8':'#bfe3ff',3,2)}}
+
+function bbFl(ix,iz,fy){const cx=(ix+.5)*BG,cz=(iz+.5)*BG;return{k:'floor',x:cx,z:cz,y:fy-.25,w:BG,d:BG,h:.25,key:`f${cx},${cz},${fy}`,q:1}}
+function bbSt(ix,iz,y,dx,dz){const cx=(ix+.5)*BG,cz=(iz+.5)*BG;return{k:'stair',x:cx,z:cz,y,w:BG,d:BG,h:BG,dx,dz,key:`s${cx},${cz},${y}`,q:1}}
+function bbMini(ty,ix,iz,fx,fz){const E=(a,b,sx,sz,y)=>bbEdge(a,b,sx,sz,y),px=fz,pz=fx,L2=[];
+ if(ty==='fort')return bbList(ix,iz,fx,fz,2+(Math.random()*2|0));
+ if(ty==='nest'){for(let k=0;k<3;k++)L2.push(bbSt(ix+fx*k,iz+fz*k,k*BG,fx,fz));const cx=ix+fx*3,cz=iz+fz*3;L2.push(bbFl(cx,cz,3*BG));L2.push(E(cx,cz,fx,fz,3*BG),E(cx,cz,px,pz,3*BG),E(cx,cz,-px,-pz,3*BG));return L2}
+ if(ty==='barricade'){for(let j=-1;j<=1;j++)for(let y=0;y<=BG;y+=BG)L2.push(E(ix+px*j,iz+pz*j,fx,fz,y));L2.push(E(ix-px,iz-pz,-px,-pz,0),E(ix+px,iz+pz,px,pz,0));return L2}
+ if(ty==='hut'){[[fx,fz],[px,pz],[-px,-pz],[-fx,-fz]].forEach(([a,c],k)=>{if(k!==3)L2.push(E(ix,iz,a,c,0))});L2.push(bbFl(ix,iz,BG));L2.push(bbFl(ix-fx,iz-fz,BG));return L2}
+ if(ty==='pyramid'){L2.push(bbSt(ix-1,iz,0,1,0),bbSt(ix+1,iz,0,-1,0),bbSt(ix,iz-1,0,0,1),bbSt(ix,iz+1,0,0,-1),bbFl(ix,iz,BG));return L2}
+ if(ty==='bridge'){const n=4;for(const k of[0,n-1])for(let y=0;y<2*BG;y+=BG)[[fx,fz],[px,pz],[-px,-pz],[-fx,-fz]].forEach(([a,c])=>L2.push(E(ix+fx*k,iz+fz*k,a,c,y)));for(let k=0;k<n;k++)L2.push(bbFl(ix+fx*k,iz+fz*k,2*BG));L2.push(bbSt(ix-fx,iz-fz,0,fx,fz));return L2}
+ for(let t=0;t<4;t++){[[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,c])=>L2.push(E(ix,iz,a,c,t*BG)))}L2.push(bbFl(ix,iz,4*BG));return L2}
 function bbPark(ix,iz,fx,fz){const L2=[],sg=Math.random()<.5?1:-1;for(let k=0;k<5;k++){const cx=(ix+fx*k+.5)*BG,cz=(iz+fz*k+.5)*BG,y=k*BG;L2.push({k:'stair',x:cx,z:cz,y,w:BG,d:BG,h:BG,dx:fx,dz:fz,key:`s${cx},${cz},${y}`,q:1})}
  let px=ix+fx*5,pz=iz+fz*5;const y=5*BG;for(let j=0;j<10;j++){const cx=(px+.5)*BG,cz=(pz+.5)*BG;L2.push({k:'floor',x:cx,z:cz,y:y-.25,w:BG,d:BG,h:.25,key:`f${cx},${cz},${y}`,q:1});if(j%3===1)L2.push(bbEdge(px,pz,fx,fz,y));if(j%2===0){px+=fx*2;pz+=fz*2}else{px+=Math.abs(fz)*sg*2;pz+=Math.abs(fx)*sg*2}}return L2}
 function bbNick(b){return b.name.replace(/^[^A-Za-zА-Яа-я0-9_]+/,'')}
@@ -3175,7 +3186,10 @@ function bbTick(dt){if(!playing||tourneyOn||won||(FB.game&&!FB.host))return;if(!
   if(b.sky||b.isl||b.zw)return;const p=b.g.position;
   if(b.bld&&b.bbT>0){b.bbT-=dt;const u=b.g.userData,k=clock.elapsedTime*22;if(u&&u.arms){u.arms.forEach((a,i)=>{a.sh.rotation.x=-1.1+Math.sin(k+i*2)*.9;a.sh.rotation.z=(i?-1:1)*.25})}if(b.tgt)b.g.rotation.y=Math.atan2((b.tgt==='me'?me.x:b.tgt.g.position.x)-p.x,(b.tgt==='me'?me.z:b.tgt.g.position.z)-p.z)}
   if(b.bld){b.bt-=dt;if(b.bt<=0){b.bt=.07;const tp=b.tgt==='me'?me:b.tgt&&!b.tgt.dead&&b.tgt.g?b.tgt.g.position:null;
-    if(b.bl&&b.bi<b.bl.length)bbPlace(b,b.parkD&&!b.pk2?3:2);else if(b.parkOK&&!b.parkD&&(b.forts||0)>=1&&pieces.length<420){b.parkD=1;const sg=Math.random()<.5?1:-1,hx=Math.random()<.5;const fx=hx?sg:0,fz=hx?0:sg;b.bl=bbPark(Math.floor(p.x/BG)+fz*3,Math.floor(p.z/BG)+fx*3,fx,fz);b.bi=0}else if(((tp&&Math.hypot(tp.x-p.x,tp.z-p.z)<45)||!b.forts)&&(b.forts||0)<4&&pieces.length<340){const t2=tp||{x:0,z:0},ax=t2.x-p.x,az=t2.z-p.z;let fx=0,fz=0;if(Math.abs(ax)>Math.abs(az))fx=Math.sign(ax);else fz=Math.sign(az);b.bl=bbList(Math.floor(p.x/BG)+fx*2,Math.floor(p.z/BG)+fz*2,fx,fz,3);b.bi=0;b.forts=(b.forts||0)+1}}}
+    if(b.bl&&b.bi<b.bl.length)bbPlace(b,2);else if(((tp&&Math.hypot(tp.x-p.x,tp.z-p.z)<50)||!b.nb)&&(b.nb||0)<5&&pieces.length<420){const t2=tp||{x:0,z:0},ax=t2.x-p.x,az=t2.z-p.z;let fx=0,fz=0;if(Math.abs(ax)>Math.abs(az))fx=Math.sign(ax)||1;else fz=Math.sign(az)||1;
+     b.used=b.used||[];const all=['fort','nest','barricade','hut','pyramid','bridge','tower'],left=all.filter(x=>!b.used.includes(x)),ty=b.nb?left[Math.random()*left.length|0]:'fort';b.used.push(ty);
+     let ox=0,oz=0;if(b.nb){const d=3+(Math.random()*3|0),a=Math.random()<.5;ox=a?fz*d*(Math.random()<.5?1:-1):fx*d;oz=a?fx*d*(Math.random()<.5?1:-1):fz*d}
+     b.bl=bbMini(ty,Math.floor(p.x/BG)+ox,Math.floor(p.z/BG)+oz,fx,fz);b.bi=0;b.nb=(b.nb||0)+1;b.forts=1}}}
   if(b.fet&&mis&&!b.mis){let best=null;
    if(b.key){best={x:KV.hx,z:KV.hz,mk:'safe',c:{get open(){return !!KV.opened}}}}
    else{if(KV.built&&!KV.opened&&!keyTaken){let bd=140;loot.forEach(l=>{if(l.taken||l.i!==KEYW)return;const d=Math.hypot(l.x-p.x,l.z-p.z);if(d<bd){bd=d;best={x:l.x,z:l.z,l,mk:'key'}}});if(best)keyTaken=true}
