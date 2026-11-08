@@ -378,7 +378,7 @@ setTimeout(fin,9000)})()</script>
 <div id="fade"></div>
 <div id="scope"></div><div class="cross"></div>
 <div class="hud"><b>АРЕНА 3D</b><span id="hud"></span></div>
-<div id="stars"></div><canvas id="map"></canvas><div id="feed"></div><div id="rate" hidden></div><div id="chat" aria-live="polite"></div><div id="chatin" hidden><input id="chatbox" maxlength="100" autocomplete="off" placeholder="Сообщение…" enterkeyhint="send"></div>
+<div id="stars"></div><canvas id="map"></canvas><div id="feed"></div><div id="rate" hidden></div><div id="chat" aria-live="polite"></div><div id="chatin" hidden><input id="chatbox" maxlength="100" autocomplete="off" placeholder="Сообщение · каждое стоит 100 👑" enterkeyhint="send"></div>
 <div id="emw" hidden><div class="wheel" id="emwheel"></div></div>
 <div id="tz" hidden><div class="bar top"></div><div class="bar bot"></div><div id="tzFlash"></div><div id="tzT"></div><div id="tzS"></div><div id="tzRecI" hidden>● ЗАПИСЬ</div><button id="tzSkip">Пропустить ✕</button></div>
 <div id="inv" hidden><div class="invbox"><div class="invh">Инвентарь <small>I или Tab — закрыть · нажми на оружие, чтобы взять · зажми предмет (или перетащи за рамку) — выбросишь</small></div><div class="invsec">Оружие</div><div id="invw" class="grid"></div><div class="invsec">Патроны и вещи</div><div id="invi" class="grid"></div><div id="invinfo">Наведи на предмет, чтобы узнать о нём</div></div></div><div id="alive"></div><div id="ann"></div><div id="toast"></div><div id="hint"></div>
@@ -3156,7 +3156,7 @@ function bbEdge(ix,iz,sx,sz,y){const x=sx?(ix+(sx>0?1:0))*BG:(ix+.5)*BG,z=sz?(iz
 function bbList(ix,iz,fx,fz,tiers){const L2=[],E=(sx,sz,y)=>bbEdge(ix,iz,sx,sz,y);
  for(let t=0;t<tiers;t++){const y=t*BG;[[fx,fz],[fz,fx],[-fz,-fx],[-fx,-fz]].forEach(([a,c],k)=>{if(t===0&&k===2)return;L2.push(E(a,c,y))});const cx=(ix+.5)*BG,cz=(iz+.5)*BG,fy=(t+1)*BG;L2.push({k:'floor',x:cx,z:cz,y:fy-.25,w:BG,d:BG,h:.25,key:`f${cx},${cz},${fy}`,q:1})}
  const bx=(ix-fx+.5)*BG,bz=(iz-fz+.5)*BG;L2.push({k:'stair',x:bx,z:bz,y:0,w:BG,d:BG,h:BG,dx:fx,dz:fz,key:`s${bx},${bz},0`,q:1});return L2}
-function bbPlace(b,n){for(let q=0;q<n&&b.bi<b.bl.length;q++){const sp=b.bl[b.bi++];if(pieceKeys.has(sp.key)||Math.abs(sp.x)>L-2||Math.abs(sp.z)>L-2||pieces.length>=470)continue;if(!dying&&me.y<4&&Math.abs(me.x-sp.x)<sp.w/2+.7&&Math.abs(me.z-sp.z)<sp.d/2+.7&&sp.k!=='floor')continue;makePiece(sp,b.mat||'m')}}
+function bbPlace(b,n){for(let q=0;q<n&&b.bi<b.bl.length;q++){const sp=b.bl[b.bi++];if(pieceKeys.has(sp.key)||Math.abs(sp.x)>L-2||Math.abs(sp.z)>L-2||pieces.length>=470)continue;if(!dying&&me.y<4&&Math.abs(me.x-sp.x)<sp.w/2+.7&&Math.abs(me.z-sp.z)<sp.d/2+.7&&sp.k!=='floor')continue;makePiece(sp,b.mat||'m');b.bbT=.3;spark(new THREE.Vector3(sp.x,sp.y+1,sp.z),sp.k==='floor'?'#ffd9a8':'#bfe3ff',3,2)}}
 function bbPark(ix,iz,fx,fz){const L2=[],sg=Math.random()<.5?1:-1;for(let k=0;k<5;k++){const cx=(ix+fx*k+.5)*BG,cz=(iz+fz*k+.5)*BG,y=k*BG;L2.push({k:'stair',x:cx,z:cz,y,w:BG,d:BG,h:BG,dx:fx,dz:fz,key:`s${cx},${cz},${y}`,q:1})}
  let px=ix+fx*5,pz=iz+fz*5;const y=5*BG;for(let j=0;j<10;j++){const cx=(px+.5)*BG,cz=(pz+.5)*BG;L2.push({k:'floor',x:cx,z:cz,y:y-.25,w:BG,d:BG,h:.25,key:`f${cx},${cz},${y}`,q:1});if(j%3===1)L2.push(bbEdge(px,pz,fx,fz,y));if(j%2===0){px+=fx*2;pz+=fz*2}else{px+=Math.abs(fz)*sg*2;pz+=Math.abs(fx)*sg*2}}return L2}
 function bbNick(b){return b.name.replace(/^[^A-Za-zА-Яа-я0-9_]+/,'')}
@@ -3172,12 +3172,10 @@ function bbTick(dt){if(!playing||tourneyOn||won||(FB.game&&!FB.host))return;if(!
  let keyTaken=bots.some(b=>b.key&&!b.dead);
  bots.forEach(b=>{if(b.dead||b.remote||b.guard)return;
   if(!b.bbI){b.bbI=1;const r=Math.random();if(BB.vip&&!BB.vd&&Math.random()<.08){BB.vd=1;bbVip(b)}else if(BB.pet&&!BB.pd&&Math.random()<.08){BB.pd=1;bbPet(b)}else if(r<.17){b.mat=Math.random()<.5?'w':'m';b.parkOK=Math.random()<.6;b.bld=1;b.wpn=1;b.armed=true;b.ammo=Math.max(b.ammo||0,90);b.name='🧱'+b.name;b.bt=0;if(b.g.userData.gun&&!b.sky)b.g.userData.gun.visible=true}else if(r<.37)b.fet=1}
-  if(b.bld&&b.sky&&b.sky!==3&&!b.bl&&b.lx!==undefined){const cx=Math.floor(b.lx/BG),cz=Math.floor(b.lz/BG),dx=-b.lx,dz=-b.lz;let fx=0,fz=0;if(Math.abs(dx)>Math.abs(dz))fx=Math.sign(dx)||1;else fz=Math.sign(dz)||1;b.bl=bbList(cx,cz,fx,fz,2);b.bi=0;b.forts=1}
-  if(b.bld&&b.sky&&b.bl){b.bt-=dt;if(b.bt<=0){b.bt=.05;bbPlace(b,2)}}
-  if(b.vip){b.ammo=Math.max(b.ammo||0,200);if(!bbFinal(b))b.hp=Math.max(b.hp,b.max*.7);if(!b.sky&&!b.isl&&!b.zw&&!dying&&!busOn){b.tgt='me';b.goal=null;b.mis=null}}
   if(b.sky||b.isl||b.zw)return;const p=b.g.position;
+  if(b.bld&&b.bbT>0){b.bbT-=dt;const u=b.g.userData,k=clock.elapsedTime*22;if(u&&u.arms){u.arms.forEach((a,i)=>{a.sh.rotation.x=-1.1+Math.sin(k+i*2)*.9;a.sh.rotation.z=(i?-1:1)*.25})}if(b.tgt)b.g.rotation.y=Math.atan2((b.tgt==='me'?me.x:b.tgt.g.position.x)-p.x,(b.tgt==='me'?me.z:b.tgt.g.position.z)-p.z)}
   if(b.bld){b.bt-=dt;if(b.bt<=0){b.bt=.07;const tp=b.tgt==='me'?me:b.tgt&&!b.tgt.dead&&b.tgt.g?b.tgt.g.position:null;
-    if(b.bl&&b.bi<b.bl.length)bbPlace(b,b.parkD&&!b.pk2?3:2);else if(b.parkOK&&!b.parkD&&(b.forts||0)>=1&&pieces.length<420){b.parkD=1;const sg=Math.random()<.5?1:-1,hx=Math.random()<.5;const fx=hx?sg:0,fz=hx?0:sg;b.bl=bbPark(Math.floor(p.x/BG)+fz*3,Math.floor(p.z/BG)+fx*3,fx,fz);b.bi=0}else if(tp&&Math.hypot(tp.x-p.x,tp.z-p.z)<45&&(b.forts||0)<4&&pieces.length<340){const ax=tp.x-p.x,az=tp.z-p.z;let fx=0,fz=0;if(Math.abs(ax)>Math.abs(az))fx=Math.sign(ax);else fz=Math.sign(az);b.bl=bbList(Math.floor(p.x/BG)+fx*2,Math.floor(p.z/BG)+fz*2,fx,fz,3);b.bi=0;b.forts=(b.forts||0)+1}}}
+    if(b.bl&&b.bi<b.bl.length)bbPlace(b,b.parkD&&!b.pk2?3:2);else if(b.parkOK&&!b.parkD&&(b.forts||0)>=1&&pieces.length<420){b.parkD=1;const sg=Math.random()<.5?1:-1,hx=Math.random()<.5;const fx=hx?sg:0,fz=hx?0:sg;b.bl=bbPark(Math.floor(p.x/BG)+fz*3,Math.floor(p.z/BG)+fx*3,fx,fz);b.bi=0}else if(((tp&&Math.hypot(tp.x-p.x,tp.z-p.z)<45)||!b.forts)&&(b.forts||0)<4&&pieces.length<340){const t2=tp||{x:0,z:0},ax=t2.x-p.x,az=t2.z-p.z;let fx=0,fz=0;if(Math.abs(ax)>Math.abs(az))fx=Math.sign(ax);else fz=Math.sign(az);b.bl=bbList(Math.floor(p.x/BG)+fx*2,Math.floor(p.z/BG)+fz*2,fx,fz,3);b.bi=0;b.forts=(b.forts||0)+1}}}
   if(b.fet&&mis&&!b.mis){let best=null;
    if(b.key){best={x:KV.hx,z:KV.hz,mk:'safe',c:{get open(){return !!KV.opened}}}}
    else{if(KV.built&&!KV.opened&&!keyTaken){let bd=140;loot.forEach(l=>{if(l.taken||l.i!==KEYW)return;const d=Math.hypot(l.x-p.x,l.z-p.z);if(d<bd){bd=d;best={x:l.x,z:l.z,l,mk:'key'}}});if(best)keyTaken=true}
@@ -3253,7 +3251,7 @@ function loop0(){const dt=Math.min(.05,clock.getDelta())*(window.__tk===undefine
    else if(!b.tgt)want=1;else if(b.armed&&b.ammo>0)want=d>16?1:d<8?-1:0;else want=d<18?-1:0;
    const tdist=Math.hypot(tx,tz)||.01,ta=fight||!want?Math.atan2(dx,dz):Math.atan2(tx*want,tz*want);
    let da=ta-b.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));b.g.rotation.y+=da*Math.min(1,dt*6);
-   if(b.sk==='noob'&&fight)want=0,str=.1;const sw=b.sk==='pro'&&fight?2.6:1.3,spd=(1.9+wave*.12)*dt*(b.goal?1.4:1)*(b.sk==='pro'?1.45:b.sk==='noob'?.7:1)*(b.boss?1.2:1)*(b.mad?1.5:b.vip?1.7:b.bld?1.3:1)*(b.dumb?(((b.t%9)<1.8)?0:.8):1),nx=tx/tdist,nz=tz/tdist,sx=-nz*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1),sz=nx*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1);
+   if(b.sk==='noob'&&fight)want=0,str=.1;const sw=b.sk==='pro'&&fight?2.6:1.3,spd=(1.9+wave*.12)*dt*(b.goal?1.4:1)*(b.sk==='pro'?1.45:b.sk==='noob'?.7:1)*(b.boss?1.2:1)*(b.mad?1.5:b.vip?1.7:b.bld?1.3:1)*(b.bbT>0?.1:1)*(b.dumb?(((b.t%9)<1.8)?0:.8):1),nx=tx/tdist,nz=tz/tdist,sx=-nz*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1),sz=nx*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1);
    const mx=(nx*want+sx)*spd,mz=(nz*want+sz)*spd,ox=p.x,oz=p.z;if(!pBlocked(p.x+mx,p.z,.4,b.by||0))p.x+=mx;if(!pBlocked(p.x,p.z+mz,.4,b.by||0))p.z+=mz;
    b.jt-=dt;if(b.jt<=0&&b.jy<=0){b.jt=b.sk==='pro'?(fight?.7+Math.random()*1.1:2+Math.random()*3):b.sk==='norm'?4+Math.random()*6:99;if(b.sk!=='noob')b.vy=b.sk==='pro'?6.5:5}
    if(b.vy||b.jy>0){b.vy-=18*dt;b.jy+=b.vy*dt;if(b.jy<=0){b.jy=0;b.vy=0}}p.y=(b.by||0)+b.jy;
