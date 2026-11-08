@@ -246,7 +246,7 @@ body.touch .weap{flex-wrap:nowrap;max-width:none;--sl:min(46px,calc((100vw - 44p
 body.touch .weap .slot{box-sizing:border-box;width:var(--sl);height:var(--sl);font-size:calc(var(--sl)*.5);border-width:2px}
 body.touch .weap .slot.med{margin-left:4px}
 #ammobox div:not(.has):not(.cur){display:none}
-body:not(.touch) #ammobox{top:calc(165px + env(safe-area-inset-top,0px));transform:none}
+body:not(.touch) #ammobox{top:calc(275px + env(safe-area-inset-top,0px));transform:none}
 @media (max-height:800px){body:not(.touch) #chat div:nth-last-child(n+5){display:none}}
 body.touch .hud{padding-left:max(16px,env(safe-area-inset-left,0px))}
 body.touch #map{right:max(12px,env(safe-area-inset-right,0px))}
@@ -1780,12 +1780,12 @@ function landSky(){me.sky=0;myChute.visible=false;toast('Приземлился!
 document.getElementById('jumpb').addEventListener('click',e=>{e.stopPropagation();jumpBus()});
 {const tb=document.getElementById('thanksb');tb.addEventListener('click',e=>{e.stopPropagation();if(!busOn||tb.hidden)return;tb.hidden=true;const id=PROF.skin;PROF.sxp[id]=(PROF.sxp[id]||0)+10;saveProf();toast('👕 +10 XP за благодарность','#9fe3ff');chime([523,659,784],.06,'triangle',.1)})}
 // ===== боты как живые игроки: ищут оружие, патроны, аптечки и сундуки =====
-function botGoal(b,d){const p=b.g.position;const needW=!b.armed,needA=b.armed&&b.ammo<12,needH=b.hp<b.max*.55;
+function botGoal(b,d){const p=b.g.position;if(b.mis){if(b.mis.l&&b.mis.l.taken||b.mis.c&&b.mis.c.open||b.mis.mk==='safe'&&KV.opened)b.mis=null;else return b.mis}const needW=!b.armed,needA=b.armed&&b.ammo<12,needH=b.hp<b.max*.55;
  if(!needW&&!needA&&!needH)return null;if(b.armed&&b.ammo>0&&d<10&&!needH)return null;let best=null,bd=40;
  loot.forEach(l=>{if(l.taken||l.base>.5||l.y-l.base>.3)return;const use=(l.i>=0&&l.i!==KNIFE&&l.i!==BLADE&&l.i!==SKNIFE&&l.i!==NUN&&l.i!==TRI&&l.i!==ELEC&&l.i!==KEYW&&(needW||needA))||(l.i<=-10&&needA)||(l.i===-1&&needH);if(!use)return;
   const dd=Math.hypot(l.x-p.x,l.z-p.z);if(dd<bd){bd=dd;best={x:l.x,z:l.z,l}}});
  if(needW||needA)chests.forEach(c=>{if(c.open||c.y>0)return;const dd=Math.hypot(c.x-p.x,c.z-p.z);if(dd<bd){bd=dd;best={x:c.x,z:c.z,c}}});return best}
-function botTake(b){const g=b.goal;b.goal=null;b.think=0;if(!g)return;
+function botTake(b){const g=b.goal;b.goal=null;b.think=0;if(!g)return;if(g.mk){bbTake(b,g);return}
  if(g.c){if(!g.c.open){openChest(g.c);feed(`${esc(b.name)} открыл сундук 📦`)}return}
  const l=g.l;if(l.taken)return;l.taken=1;S.remove(l.g);const bp=b.g.position.clone().setY(1.6);
  if(l.i>=0){const w=WEAP[l.i];b.ammo+=w.mag+15;if(!b.armed)feed(`${esc(b.name)} подобрал ${w.ic} ${w.n}`);b.armed=true;b.wpn=l.i}
@@ -2036,8 +2036,8 @@ function botSky(b,dt){if(b.sky===3)return;if(b.chute&&b.chute.scale.x<1)b.chute.
     if(b.sky===1&&p.y<32){b.sky=2;b.chute=chuteMesh(CH_COLS[Math.random()*8|0]);b.chute.visible=true;b.chute.position.set(0,2.6,0);b.chute.scale.setScalar(.05);b.g.add(b.chute);snd('thud',.3)}
     if(p.y<=0){p.y=0;b.sky=0;if(b.chute){b.g.remove(b.chute);b.chute=null}u.arms.forEach(a=>{a.sh.rotation.x=0;a.sh.rotation.z=0})}}
 let busDrop=0,busDropT=0;
-function busDropTick(dt){if(myChute.visible&&myChute.scale.x<1)myChute.scale.setScalar(Math.min(1,myChute.scale.x+dt*2.2));if(busOn)bots.forEach(b=>{if(b.sky&&!b.dead)botSky(b,dt)});if(!playing||busDrop<=0||!bus.visible)return;const bx=bus.position.x,bz=bus.position.z;if(Math.abs(bx)>L-6||Math.abs(bz)>L-6)return;busDropT-=dt;if(busDropT>0)return;busDropT=.25+Math.random()*.2;busDrop--;spawnBot(bx,bz)}
-function reset(){pass=null;carry=null;handBlood=0;shoot._bt=0;try{applySleeves()}catch(_){};exitCar();endDeathCam();endMatch.done=0;TOTAL=tourneyOn?10:100;tourEnv(tourneyOn);piecesReset();carsReset();if(me)me.zip=null;nades=0;revealBlack(false);if(invOpen)toggleInv();rollT=0;shops.forEach(o=>{shopNPC=o;unrob()});doors.forEach(d=>setDoor(d,false));chatEl.innerHTML='';busOn=false;bus.visible=false;me&&(me.sky=0);myChute.visible=false;document.getElementById('jumpb').hidden=true;bots.forEach(b=>S.remove(b.g));bots=[];shots.forEach(s=>S.remove(s.m));shots=[];me={x:0,z:-2,y:1.7,hp:100,sh:0,lives:1};ammo=freshAmmo();reloading=0;aiming=false;ab.classList.remove('on');goals.forEach(g=>g.done=false);resetLoadout();clearLoot();spawnGroundLoot();resetChests();god=false;invT=invCd=0;hideIn=null;document.body.classList.remove('hiding');document.body.classList.remove('god','cloak');prevStars=0;streak=0;kills=0;multi=0;firstBlood=false;curLoc='';feedEl.innerHTML='';holes.forEach(h=>S.remove(h));holes.length=0;score=0;wave=0;yaw=0;pitch=0;dying=false;nextWave();busDrop=(tourneyOn||(FB.game&&!FB.host))?0:26;busDropT=0;secretsReset()}
+function busDropTick(dt){if(myChute.visible&&myChute.scale.x<1)myChute.scale.setScalar(Math.min(1,myChute.scale.x+dt*2.2));if(busOn)bots.forEach(b=>{if(b.sky&&!b.dead)botSky(b,dt)});if(!playing||busDrop<=0||!bus.visible)return;const bx=bus.position.x,bz=bus.position.z;if(Math.abs(bx)>L-6||Math.abs(bz)>L-6)return;busDropT-=dt;if(busDropT>0)return;busDropT=.04+Math.random()*.05;busDrop--;spawnBot(bx,bz)}
+function reset(){pass=null;carry=null;handBlood=0;shoot._bt=0;try{applySleeves()}catch(_){};exitCar();endDeathCam();endMatch.done=0;TOTAL=tourneyOn?10:100;tourEnv(tourneyOn);piecesReset();carsReset();if(me)me.zip=null;nades=0;revealBlack(false);if(invOpen)toggleInv();rollT=0;shops.forEach(o=>{shopNPC=o;unrob()});doors.forEach(d=>setDoor(d,false));chatEl.innerHTML='';busOn=false;bus.visible=false;me&&(me.sky=0);myChute.visible=false;document.getElementById('jumpb').hidden=true;bots.forEach(b=>S.remove(b.g));bots=[];shots.forEach(s=>S.remove(s.m));shots=[];me={x:0,z:-2,y:1.7,hp:100,sh:0,lives:1};ammo=freshAmmo();reloading=0;aiming=false;ab.classList.remove('on');goals.forEach(g=>g.done=false);resetLoadout();clearLoot();spawnGroundLoot();resetChests();god=false;invT=invCd=0;hideIn=null;document.body.classList.remove('hiding');document.body.classList.remove('god','cloak');prevStars=0;streak=0;kills=0;multi=0;firstBlood=false;curLoc='';feedEl.innerHTML='';holes.forEach(h=>S.remove(h));holes.length=0;score=0;wave=0;yaw=0;pitch=0;dying=false;nextWave();busDrop=(tourneyOn||(FB.game&&!FB.host))?0:TOTAL-1;busDropT=0;secretsReset()}
 function loseLife(){if(dying)return;if(pass)pass=null;carry=null;if(FB.game&&!me.kn&&!me.bleed&&teamAliveOthers()){knockDown();return}me.kn=null;stopEmote();exitCar();dying=true;firing=false;aiming=false;ab.classList.remove('on');me.lives--;streak=0;dropAll();fade.style.opacity=.85;
  if(me.lives<=0){if(FB.game&&!FB.specDone&&teamAliveOthers()){spectate();return}brPlace=brLeft()+1;const wT=tourneyOn;tourneyOn=false;endMatch(false,brPlace);passXP(1);if(wT){}else if(brPlace<=10)winCrown(3,'топ-10');else if(brPlace<=25)winCrown(1,'топ-25');setTimeout(()=>{playing=false;document.exitPointerLock&&document.exitPointerLock();document.getElementById('st').textContent='ИГРА ОКОНЧЕНА';
   document.getElementById('sp').textContent='Место: #'+brPlace+' из '+TOTAL+' · Очки: '+score+' · Звёзды: '+(prevStars?'★'.repeat(prevStars):'нет')+' · Убийств: '+kills+' · Волна: '+wave;st.hidden=false;st.classList.remove('fading');fade.style.opacity=0;endDeathCam()},5500);startDeathCam();return}
@@ -2109,7 +2109,7 @@ function buildSpot(){const fx=-Math.sin(yaw),fz=-Math.cos(yaw),ft=me.y-(me.eh||1
  if(k==='wall'){if(pitch>.65)by+=BG;const x=dx?(ix+(dx>0?1:0))*BG:(ix+.5)*BG,z=dz?(iz+(dz>0?1:0))*BG:(iz+.5)*BG;sp={k,x,z,y:by,w:dx?.3:BG,d:dz?.3:BG,h:BG,key:`w${x},${z},${by}`}}
  else if(k==='floor'){const fy=(ft<.6&&pitch>-.35)?by+BG:by;const cx=(ix+dx+.5)*BG,cz=(iz+dz+.5)*BG;sp={k,x:cx,z:cz,y:fy-.25,w:BG,d:BG,h:.25,key:`f${cx},${cz},${fy}`}}
  else{const cx=(ix+dx+.5)*BG,cz=(iz+dz+.5)*BG;sp={k,x:cx,z:cz,y:by,w:BG,d:BG,h:BG,dx,dz,key:`s${cx},${cz},${by}`}}
- sp.ok=Math.abs(sp.x)<L-2&&Math.abs(sp.z)<L-2&&!pieceKeys.has(sp.key)&&pieces.length<150;
+ sp.ok=Math.abs(sp.x)<L-2&&Math.abs(sp.z)<L-2&&!pieceKeys.has(sp.key)&&pieces.length<400;
  if(sp.ok&&k==='wall'&&Math.abs(me.x-sp.x)<sp.w/2+.36&&Math.abs(me.z-sp.z)<sp.d/2+.36&&sp.y<ft+1.7&&sp.y+sp.h>ft)sp.ok=false;
  sp.cash=mats[build.mat]>=PCOST;return sp}
 function buildTick(dt){pieces.forEach(pc=>{if(pc.grow<1){pc.grow=Math.min(1,pc.grow+dt*5);pc.m.scale.setScalar(.2+.8*pc.grow)}if(pc.flash>0){pc.flash-=dt;pc.m.material=pc.flash>0?pc.hitM:PMAT[pc.mat]}});
@@ -2122,7 +2122,7 @@ function makePiece(sp,mat){if(pieceKeys.has(sp.key))return;const pc={k:sp.k,mat,
  if(sp.k==='stair'){const m=new THREE.Mesh(new THREE.BoxGeometry(sp.dx?BG*1.414:BG,.2,sp.dz?BG*1.414:BG),PMAT[mat]);m.position.set(sp.x,sp.y+BG/2,sp.z);m.rotation.set(sp.dz?(sp.dz>0?-1:1)*Math.PI/4:0,0,sp.dx?(sp.dx>0?1:-1)*Math.PI/4:0);pc.m=m;
   const N=8,st=BG/N;for(let i=0;i<N;i++){const o=-BG/2+(i+.5)*st,top=sp.y+(i+1)*st;const sd={x:sp.x+sp.dx*o,z:sp.z+sp.dz*o,w:sp.dx?st:BG,d:sp.dz?st:BG,h:top,y0:Math.max(sp.y,top-.45),piece:pc};pc.sds.push(sd)}}
  else{const m=new THREE.Mesh(new THREE.BoxGeometry(sp.w,sp.h,sp.d),PMAT[mat]);m.position.set(sp.x,sp.y+sp.h/2,sp.z);pc.m=m;pc.sds.push({x:sp.x,z:sp.z,w:sp.w,d:sp.d,h:sp.y+sp.h,y0:sp.y,piece:pc})}
- pc.m.castShadow=pc.m.receiveShadow=true;pc.m.userData.piece=pc;pc.m.scale.setScalar(.2);S.add(pc.m);pc.sds.forEach(d=>solid.push(d));pieces.push(pc);pieceKeys.add(pc.key);snd(mat==='w'?'thud':'click',.7)}
+ pc.m.castShadow=pc.m.receiveShadow=true;pc.m.userData.piece=pc;pc.m.scale.setScalar(.2);S.add(pc.m);pc.sds.forEach(d=>solid.push(d));pieces.push(pc);pieceKeys.add(pc.key);if(!sp.q)snd(mat==='w'?'thud':'click',.7)}
 function pieceAt(x,z,y,r){return pieces.find(pc=>pc.sds.some(d=>Math.abs(x-d.x)<d.w/2+r&&Math.abs(z-d.z)<d.d/2+r&&d.h>y+.1&&(d.y0||0)<y+1.8))||null}
 function carSmash(x,z,y){pieces.slice().forEach(pc=>{if(pc.mat==='w'&&pc.sds.some(d=>Math.abs(x-d.x)<d.w/2+1.2&&Math.abs(z-d.z)<d.d/2+1.2&&d.h>y+.1&&(d.y0||0)<y+1.8)){dmgPiece(pc,1e5);shakeT=.25}})}
 let metalT0=0;function metalHint(){const n=performance.now();if(n-metalT0<2500)return;metalT0=n;toast('🔩 Металл пробивают только миниган и гранатомёт','#c9ced6')}
@@ -3144,6 +3144,30 @@ function wolfOrbBoom(pos){snd('thud',.9);chime([400,700,1100,1700],.06);
  const m=new THREE.Mesh(new THREE.RingGeometry(.85,1,48),new THREE.MeshBasicMaterial({color:'#ffd23f',transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));m.position.set(pos.x,.2,pos.z);m.rotation.x=-Math.PI/2;S.add(m);shkFx.push({m,t:0,d:.55});
  for(let i=0;i<7;i++)spark(new THREE.Vector3(pos.x,.5+i*2.6,pos.z),'#ffd23f',10,8);
  bots.forEach(b=>{if(b.dead||b.remote)return;const q=b.g.position;if(Math.hypot(q.x-pos.x,q.z-pos.z)<11&&Math.abs(q.y-pos.y)<8){b.vy=40;b.jy=.01;spark(new THREE.Vector3(q.x,q.y+1.2,q.z),'#ffd23f',16,7);hitBot(b,99999,{id:++shotId,icon:'🟡',p:new THREE.Vector3(q.x,q.y+1.6,q.z)})}})}
+
+// ===== боты: стройка фортов, ключ+сейф, биосферы, сундуки =====
+const BB={t:0};
+function bbTake(b,g){b.mis=null;const p=b.g.position;
+ if(g.mk==='gold'){if(g.l.taken)return;g.l.taken=1;S.remove(g.l.g);b.hp=b.max=b.max*2.5;b.elite=1;b.armed=true;b.ammo=Math.max(b.ammo||0,300);b.gold=1;if(b.g.userData.gun)b.g.userData.gun.visible=true;spark(new THREE.Vector3(p.x,p.y+1.3,p.z),'#ffd23f',24,6);chatSys('🌟 '+b.name+' забрал золотую биосферу!')}
+ else if(g.mk==='key'){if(g.l.taken)return;g.l.taken=1;S.remove(g.l.g);b.key=1;chatSys('🔑 '+b.name+' взял золотой ключ!')}
+ else if(g.mk==='safe'){b.key=0;if(KV.opened)return;KV.opened=1;KV.chs.forEach(c=>{c.lock=0;c.g.visible=true;c.g.scale.setScalar(1)});if(KV.pop<5){spawnLoot(ELEC,KV.cx,KV.hz+2.2,0,0);KV.pop=5}chatSys('🔓 '+b.name+' открыл сейф!');spark(new THREE.Vector3(KV.hx,1.3,KV.hz),'#ffd23f',30,7)}}
+function bbEdge(ix,iz,sx,sz,y){const x=sx?(ix+(sx>0?1:0))*BG:(ix+.5)*BG,z=sz?(iz+(sz>0?1:0))*BG:(iz+.5)*BG;return{k:'wall',x,z,y,w:sx?.3:BG,d:sz?.3:BG,h:BG,key:`w${x},${z},${y}`,q:1}}
+function bbFort(b,tp){const p=b.g.position,ix=Math.floor(p.x/BG),iz=Math.floor(p.z/BG),ax=tp.x-p.x,az=tp.z-p.z;let fx=0,fz=0;if(Math.abs(ax)>Math.abs(az))fx=Math.sign(ax);else fz=Math.sign(az);
+ const seq=[bbEdge(ix,iz,fx,fz,0),bbEdge(ix,iz,fz,fx,0),bbEdge(ix,iz,-fz,-fx,0),bbEdge(ix,iz,fx,fz,BG),bbEdge(ix,iz,fz,fx,BG),bbEdge(ix,iz,-fz,-fx,BG),bbEdge(ix,iz,-fx,-fz,0)];
+ for(let n=0;n<2&&b.bc<seq.length;n++){const sp=seq[b.bc++];if(pieceKeys.has(sp.key)||Math.abs(sp.x)>L-2||Math.abs(sp.z)>L-2)continue;if(!dying&&Math.abs(me.x-sp.x)<sp.w/2+.7&&Math.abs(me.z-sp.z)<sp.d/2+.7&&me.y<4)continue;makePiece(sp,'m')}}
+function bbTick(dt){if(!playing||busOn||tourneyOn||won||(FB.game&&!FB.host))return;BB.t-=dt;const mis=BB.t<=0;if(mis)BB.t=2.5;
+ let keyTaken=bots.some(b=>b.key&&!b.dead);
+ bots.forEach(b=>{if(b.dead||b.remote||b.guard)return;
+  if(!b.bbI){b.bbI=1;const r=Math.random();if(r<.2){b.bld=1;b.wpn=1;b.armed=true;b.ammo=Math.max(b.ammo||0,90);b.name='🧱'+b.name;b.bc=99;b.bt=0;if(b.g.userData.gun&&!b.sky)b.g.userData.gun.visible=true}else if(r<.4)b.fet=1}
+  if(b.sky||b.isl||b.zw)return;const p=b.g.position;
+  if(b.bld){b.bt-=dt;if(b.bt<=0){b.bt=.07;const tp=b.tgt==='me'?me:b.tgt&&!b.tgt.dead&&b.tgt.g?b.tgt.g.position:null;
+    if(tp&&Math.hypot(tp.x-p.x,tp.z-p.z)<45&&pieces.length<300){if(b.bc>=99||Math.hypot(p.x-(b.bx||0),p.z-(b.bz||0))>7){b.bc=0;b.bx=p.x;b.bz=p.z}bbFort(b,tp)}}}
+  if(b.fet&&mis&&!b.mis){let best=null;
+   if(b.key){best={x:KV.hx,z:KV.hz,mk:'safe',c:{get open(){return !!KV.opened}}}}
+   else{if(KV.built&&!KV.opened&&!keyTaken){let bd=140;loot.forEach(l=>{if(l.taken||l.i!==KEYW)return;const d=Math.hypot(l.x-p.x,l.z-p.z);if(d<bd){bd=d;best={x:l.x,z:l.z,l,mk:'key'}}});if(best)keyTaken=true}
+    if(!best){let bd=120;loot.forEach(l=>{if(l.taken||l.i!==-6)return;const d=Math.hypot(l.x-p.x,l.z-p.z);if(d<bd){bd=d;best={x:l.x,z:l.z,l,mk:'gold'}}})}
+    if(!best){let bd=90;chests.forEach(c=>{if(c.open||c.lock||!c.g.visible)return;const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd){bd=d;best={x:c.x,z:c.z,c}}})}}
+   if(best)b.mis=best}})}
 function loop0(){const dt=Math.min(.05,clock.getDelta())*(window.__tk===undefined?1:window.__tk);
  if(playing){if(!window.__lobStuff)window.__lobStuff=S.children.filter(o=>o!==lobIsl&&o.position&&Math.abs(o.position.y-LOBY)<.5&&Math.abs(o.position.x)<.01&&Math.abs(o.position.z)<.01&&(o.geometry&&(o.geometry.type==='CylinderGeometry'||o.geometry.type==='TorusGeometry')));
   if(lobChar&&lobChar.visible)lobChar.visible=false;if(typeof bGhost!=='undefined'&&bGhost&&bGhost.visible)bGhost.visible=false;lobIsl.visible=lobClouds.visible=lobBack.visible=false;window.__lobStuff.forEach(o=>o.visible=false)}
@@ -3213,7 +3237,7 @@ function loop0(){const dt=Math.min(.05,clock.getDelta())*(window.__tk===undefine
    else if(!b.tgt)want=1;else if(b.armed&&b.ammo>0)want=d>16?1:d<8?-1:0;else want=d<18?-1:0;
    const tdist=Math.hypot(tx,tz)||.01,ta=fight||!want?Math.atan2(dx,dz):Math.atan2(tx*want,tz*want);
    let da=ta-b.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));b.g.rotation.y+=da*Math.min(1,dt*6);
-   if(b.sk==='noob'&&fight)want=0,str=.1;const sw=b.sk==='pro'&&fight?2.6:1.3,spd=(1.9+wave*.12)*dt*(b.goal?1.4:1)*(b.sk==='pro'?1.45:b.sk==='noob'?.7:1)*(b.boss?1.2:1)*(b.mad?1.5:1)*(b.dumb?(((b.t%9)<1.8)?0:.8):1),nx=tx/tdist,nz=tz/tdist,sx=-nz*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1),sz=nx*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1);
+   if(b.sk==='noob'&&fight)want=0,str=.1;const sw=b.sk==='pro'&&fight?2.6:1.3,spd=(1.9+wave*.12)*dt*(b.goal?1.4:1)*(b.sk==='pro'?1.45:b.sk==='noob'?.7:1)*(b.boss?1.2:1)*(b.mad?1.5:b.bld?1.3:1)*(b.dumb?(((b.t%9)<1.8)?0:.8):1),nx=tx/tdist,nz=tz/tdist,sx=-nz*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1),sz=nx*Math.sin(b.t*sw)*str*(b.sk==='pro'&&fight?1.6:1);
    const mx=(nx*want+sx)*spd,mz=(nz*want+sz)*spd,ox=p.x,oz=p.z;if(!pBlocked(p.x+mx,p.z,.4,b.by||0))p.x+=mx;if(!pBlocked(p.x,p.z+mz,.4,b.by||0))p.z+=mz;
    b.jt-=dt;if(b.jt<=0&&b.jy<=0){b.jt=b.sk==='pro'?(fight?.7+Math.random()*1.1:2+Math.random()*3):b.sk==='norm'?4+Math.random()*6:99;if(b.sk!=='noob')b.vy=b.sk==='pro'?6.5:5}
    if(b.vy||b.jy>0){b.vy-=18*dt;b.jy+=b.vy*dt;if(b.jy<=0){b.jy=0;b.vy=0}}p.y=(b.by||0)+b.jy;
@@ -3266,7 +3290,7 @@ function loop0(){const dt=Math.min(.05,clock.getDelta())*(window.__tk===undefine
   const roof=solid.some(b=>(b.y0||0)>p.y+1&&(b.y0||0)<p.y+5&&Math.abs(p.x-b.x)<b.w/2&&Math.abs(p.z-b.z)<b.d/2),cd2=roof?5:7.5,ch=roof?2.3:3.4;C.position.set(p.x-Math.cos(ry)*cd2,p.y+ch,p.z+Math.sin(ry)*cd2);C.lookAt(p.x+Math.cos(ry)*3,p.y+1.2,p.z-Math.sin(ry)*3);C.fov+=(70+Math.abs(drive.v)*.6-C.fov)*Math.min(1,dt*4);C.updateProjectionMatrix()}
  if(playing&&me.sky===1)C.fov+=(88-C.fov)*Math.min(1,dt*3),C.updateProjectionMatrix();
  hintEl.textContent=playing?(FB.game&&me.kn?'🆘 Нокдаун — ползи в укрытие, друг может поднять':FB.game&&nearKnocked()?'💚 Держи E — поднять друга':busOn?busHint():me.zip?'🚡 Едешь по тросу · ПРОБЕЛ — спрыгнуть':nearZip()?'E — схватиться за трос и поехать':me.climb?'🧗 Лезешь по верёвке — держи W':nearWin()?'B — залезть в разбитое окно':me.sky===1?'🪂 Свободное падение · WASD — лететь · ПРОБЕЛ — парашют':me.sky===2?'🪂 Парашют · WASD — управлять':nearShop()?(shopUsed?(shopNPC.robbed?'🧑‍💼 Продавец сдался и сидит на коленях':'🧑‍💼 «Приходи через минуту!»'):(shopNPC.cx>0?'E — поговорить с продавщицей':'E — поговорить с продавцом')+(shopNPC.cx>0&&!owned[SKNIFE]?': она даст ножик 🔪':': аптечка и патроны')):nearDoor()?(nearDoor().open?'E — закрыть дверь':'E — открыть дверь'):pass?'🚗 Ты пассажир · E — выйти':(!drive&&remoteCarNear())?'E — сесть пассажиром (до 4 человек)':drive?`🚗 ${Math.round(Math.abs(drive.v)*3.6)} км/ч · ⛽ ${Math.ceil(drive.fuel||0)}%${nearGas()?' · R — заправить (100 очков)':drive.fuel<=0?' · бензин кончился!':''} · M — радио${radioI?' 📻':''} · E — выйти`:nearCar()?'E — сесть в машину':''):'';
- carFx(dt);buildTick(dt);tourFog();rateT-=dt;if(rateT<=0){rateT=.5;tourRate()}fbTick(dt);emoteTick(dt);vicTick(dt);gchTick(dt);kvTick(dt);elecTick(dt);wolfTick(dt);secretsTick(dt);busDropTick(dt);busMove(dt);ringTick(dt);dayNight(dt);zoneTick(dt);botExtra(dt);deathCamTick(dt);netTick(dt);teaserTick(dt);if(FB.specR&&FB.specR.g)FB.specR.g.visible=false;hzCameoTick(dt);if(hzTick(dt))R.render(HZ.S,HZ.C);else R.render(S,C);if(teaser&&teaser.rec)tzCompose();if(gRec)recCompose()}
+ carFx(dt);buildTick(dt);tourFog();rateT-=dt;if(rateT<=0){rateT=.5;tourRate()}fbTick(dt);emoteTick(dt);vicTick(dt);gchTick(dt);kvTick(dt);elecTick(dt);wolfTick(dt);secretsTick(dt);busDropTick(dt);busMove(dt);ringTick(dt);dayNight(dt);zoneTick(dt);botExtra(dt);bbTick(dt);deathCamTick(dt);netTick(dt);teaserTick(dt);if(FB.specR&&FB.specR.g)FB.specR.g.visible=false;hzCameoTick(dt);if(hzTick(dt))R.render(HZ.S,HZ.C);else R.render(S,C);if(teaser&&teaser.rec)tzCompose();if(gRec)recCompose()}
 me={x:0,z:-2,y:1.7,hp:100};score=0;wave=0;startLoop();
 </script>
 
